@@ -1,4 +1,3 @@
-import 'react-native-url-polyfill/auto';
 import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AuthContextProvider } from '../context/AuthContext';
