@@ -16,14 +16,15 @@ export default function CustomerTabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: Colors.primary,
-          borderTopWidth: 0,
+          backgroundColor: Colors.black,
+          borderTopWidth: 1,
+          borderTopColor: Colors.w10,
           elevation: 0,
           shadowOpacity: 0,
         },
         tabBarActiveTintColor: Colors.lime,
-        tabBarInactiveTintColor: 'rgba(255,255,255,0.5)',
-        tabBarLabelStyle: { fontSize: 11, fontWeight: '600' },
+        tabBarInactiveTintColor: Colors.w40,
+        tabBarLabelStyle: { fontSize: 11, fontWeight: '500' },
       }}>
       <Tabs.Screen
         name="index"

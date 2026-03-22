@@ -1,232 +1,193 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
-  StatusBar,
-  Dimensions,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Colors, Spacing, BorderRadius, FontSize } from '../../constants/Colors';
-
-const { width } = Dimensions.get('window');
-
-const FOOD_PREVIEW = [
-  { emoji: '🥐', name: 'Pastry Pack', discount: '67% off' },
-  { emoji: '🍱', name: 'Rice Bowl', discount: '70% off' },
-  { emoji: '☕', name: 'Matcha Latte', discount: '62% off' },
-];
+import { Colors } from '../../constants/Colors';
 
 /**
- * SplashScreen
+ * SplashScreen (Welcome)
  *
- * Welcome / landing screen shown to unauthenticated users. Dark theme (#1a1a1a).
- * Displays massive stacked hero typography: RESCUE / FOOD. / SAVE BIG.
- * A row of food preview cards, lime CTA for customers, white-outlined CTA for business.
+ * Landing screen for unauthenticated users. Matches the Premium Food Waste App
+ * Mock-up React Native design exactly:
+ * - Lime bordered location badge at top
+ * - Massive stacked RESCUE / FOOD. (lime) / SAVE (white) BIG. (orange) hero
+ * - Subtitle text
+ * - Lime primary CTA (customer), white-outlined secondary CTA (business)
  */
 export default function SplashScreen() {
   const router = useRouter();
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.dark} />
-
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      {/* Top badge */}
       <View style={styles.topSection}>
-        {/* Brand badge */}
-        <View style={styles.brandRow}>
-          <View style={styles.logoBadge}>
-            <Text style={styles.logoEmoji}>🌿</Text>
-          </View>
-          <Text style={styles.logoText}>Zeroooh!</Text>
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>● NOW LIVE IN WOLLONGONG & SYDNEY</Text>
         </View>
+      </View>
 
-        {/* Hero typography */}
-        <View style={styles.heroContainer}>
-          <Text style={styles.heroLine}>RESCUE</Text>
-          <Text style={[styles.heroLine, styles.heroLime]}>FOOD.</Text>
-          <Text style={styles.heroTagline}>
-            Great deals at half the price —{'\n'}and zero waste.
+      {/* Hero */}
+      <View style={styles.mainSection}>
+        <View style={styles.heroSection}>
+          <View style={styles.headlineContainer}>
+            <Text style={[styles.headline, styles.headlineWhite]}>RESCUE</Text>
+            <Text style={[styles.headline, styles.headlineLime]}>FOOD.</Text>
+            <View style={styles.headlineRow}>
+              <Text style={[styles.headline, styles.headlineWhite]}>SAVE </Text>
+              <Text style={[styles.headline, styles.headlineOrange]}>BIG.</Text>
+            </View>
+          </View>
+          <Text style={styles.subtitle}>
+            Connect with restaurants selling surplus food at up to 70% off — minutes before it's thrown away.
           </Text>
         </View>
 
-        <View style={styles.locationBadge}>
-          <Text style={styles.locationDot}>📍</Text>
-          <Text style={styles.locationText}>Now live in Wollongong & Sydney</Text>
+        {/* Brand mark */}
+        <View style={styles.brandMark}>
+          <Text style={styles.brandMarkText}>zeroooh!</Text>
         </View>
       </View>
 
-      {/* Food preview cards */}
-      <View style={styles.illustrationArea}>
-        <View style={styles.foodCardRow}>
-          {FOOD_PREVIEW.map((item, i) => (
-            <View key={i} style={[styles.foodCard, i === 1 && styles.foodCardCenter]}>
-              <Text style={styles.foodCardEmoji}>{item.emoji}</Text>
-              <Text style={styles.foodCardName}>{item.name}</Text>
-              <View style={styles.foodCardBadge}>
-                <Text style={styles.foodCardBadgeText}>{item.discount}</Text>
-              </View>
-            </View>
-          ))}
-        </View>
-      </View>
-
-      {/* CTA buttons */}
-      <View style={styles.ctaContainer}>
+      {/* CTA Buttons */}
+      <View style={styles.ctaSection}>
         <TouchableOpacity
-          style={styles.primaryButton}
           onPress={() => router.push('/(auth)/login')}
-          activeOpacity={0.85}>
-          <Text style={styles.primaryButtonText}>GET THE APP — CUSTOMER</Text>
+          style={styles.primaryButton}
+          activeOpacity={0.7}>
+          <Text style={styles.primaryButtonText}>Get the App - Customer</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={styles.secondaryButton}
           onPress={() => router.push('/(auth)/business-login')}
-          activeOpacity={0.85}>
+          style={styles.secondaryButton}
+          activeOpacity={0.7}>
           <Text style={styles.secondaryButtonText}>Business Partner</Text>
         </TouchableOpacity>
 
-        <Text style={styles.footerText}>
-          Join thousands saving food in your city.
-        </Text>
+        <Text style={styles.tagline}>Great food. Half the price. Zero waste.</Text>
       </View>
-    </SafeAreaView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.dark },
-  topSection: {
+  container: {
     flex: 1,
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.xl,
+    backgroundColor: Colors.black,
   },
-  brandRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: Spacing.xl,
-    gap: Spacing.sm,
+  contentContainer: {
+    flexGrow: 1,
+    paddingHorizontal: 32,
+    paddingVertical: 32,
+    justifyContent: 'space-between',
   },
-  logoBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
-    backgroundColor: Colors.primary,
+  topSection: {
+    width: '100%',
+    paddingTop: 32,
+  },
+  badge: {
+    backgroundColor: Colors.lime10,
+    borderWidth: 1,
+    borderColor: Colors.lime,
+    borderRadius: 9999,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    alignSelf: 'flex-start',
+  },
+  badgeText: {
+    color: Colors.lime,
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+  },
+  mainSection: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoEmoji: { fontSize: 20 },
-  logoText: {
-    fontSize: FontSize.xl,
-    fontWeight: '800',
+  heroSection: {
+    alignItems: 'center',
+    marginBottom: 48,
+  },
+  headlineContainer: {
+    marginBottom: 24,
+    alignItems: 'center',
+  },
+  headlineRow: {
+    flexDirection: 'row',
+  },
+  headline: {
+    fontSize: 64,
+    fontWeight: '900',
+    lineHeight: 64,
+    letterSpacing: -1,
+  },
+  headlineWhite: {
     color: Colors.white,
+  },
+  headlineLime: {
+    color: Colors.lime,
+  },
+  headlineOrange: {
+    color: Colors.orange,
+  },
+  subtitle: {
+    color: Colors.w80,
+    textAlign: 'center',
+    maxWidth: 320,
+    fontSize: 17,
+    lineHeight: 25.5,
+  },
+  brandMark: {
+    borderWidth: 2,
+    borderColor: Colors.w20,
+    borderRadius: 12,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  brandMarkText: {
+    color: Colors.white,
+    fontSize: 20,
+    fontWeight: '800',
     letterSpacing: -0.5,
   },
-  heroContainer: { marginBottom: Spacing.lg },
-  heroLine: {
-    fontSize: 58,
-    fontWeight: '900',
-    color: Colors.white,
-    letterSpacing: -2,
-    lineHeight: 62,
-  },
-  heroLime: { color: Colors.lime },
-  heroTagline: {
-    fontSize: FontSize.md,
-    color: Colors.muted,
-    lineHeight: 22,
-    marginTop: Spacing.md,
-  },
-  locationBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.darkCard,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs + 2,
-    borderRadius: BorderRadius.full,
-    gap: Spacing.xs,
-    alignSelf: 'flex-start',
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  locationDot: { fontSize: 13 },
-  locationText: { fontSize: FontSize.sm, fontWeight: '600', color: Colors.white },
-  illustrationArea: { paddingHorizontal: Spacing.lg, marginVertical: Spacing.lg },
-  foodCardRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: Spacing.sm,
-  },
-  foodCard: {
-    backgroundColor: Colors.darkCard,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.md,
-    alignItems: 'center',
-    width: (width - Spacing.lg * 2 - Spacing.sm * 2) / 3,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  foodCardCenter: {
-    transform: [{ translateY: -8 }],
-    borderColor: Colors.lime,
-    borderWidth: 2,
-  },
-  foodCardEmoji: { fontSize: 28, marginBottom: Spacing.xs },
-  foodCardName: {
-    fontSize: FontSize.xs,
-    fontWeight: '600',
-    color: Colors.white,
-    textAlign: 'center',
-    marginBottom: Spacing.xs,
-  },
-  foodCardBadge: {
-    backgroundColor: Colors.lime,
-    borderRadius: BorderRadius.full,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  foodCardBadgeText: { fontSize: 9, fontWeight: '800', color: Colors.charcoal },
-  ctaContainer: {
-    paddingHorizontal: Spacing.lg,
-    paddingBottom: Spacing.xl,
-    gap: Spacing.sm,
+  ctaSection: {
+    width: '100%',
+    gap: 12,
   },
   primaryButton: {
     backgroundColor: Colors.lime,
-    borderRadius: BorderRadius.lg,
-    paddingVertical: Spacing.md + 2,
+    borderRadius: 16,
+    height: 56,
     alignItems: 'center',
-    shadowColor: Colors.lime,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 5,
+    justifyContent: 'center',
+    width: '100%',
   },
   primaryButtonText: {
-    fontSize: FontSize.md,
-    fontWeight: '800',
-    color: Colors.dark,
-    letterSpacing: 0.5,
+    color: Colors.black,
+    fontWeight: '700',
+    fontSize: 17,
+    textTransform: 'uppercase',
   },
   secondaryButton: {
-    borderRadius: BorderRadius.lg,
-    paddingVertical: Spacing.md + 2,
-    alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'rgba(255,255,255,0.3)',
     backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderColor: Colors.white,
+    borderRadius: 16,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
   },
   secondaryButtonText: {
-    fontSize: FontSize.lg,
-    fontWeight: '700',
     color: Colors.white,
+    fontWeight: '700',
+    fontSize: 17,
+    textTransform: 'uppercase',
   },
-  footerText: {
+  tagline: {
+    color: Colors.w40,
     textAlign: 'center',
-    fontSize: FontSize.sm,
-    color: Colors.muted,
-    marginTop: Spacing.xs,
+    paddingTop: 8,
+    fontSize: 14,
   },
 });

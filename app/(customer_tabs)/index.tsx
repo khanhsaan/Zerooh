@@ -5,53 +5,47 @@ import {
   StyleSheet,
   SafeAreaView,
   StatusBar,
-  FlatList,
   ScrollView,
+  FlatList,
   RefreshControl,
   TextInput,
   TouchableOpacity,
   Alert,
+  Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Colors, Spacing, BorderRadius, FontSize } from '../../constants/Colors';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors } from '../../constants/Colors';
 import { useProducts } from '../../hooks/useProducts';
 import { useCarts } from '../../hooks/useCarts';
 import { useProfile } from '../../hooks/useProfile';
 import { useAsyncWithTimeout } from '../../hooks/useAsyncWithTimeout';
 import { Product } from '../../types';
-import ProductCard from '../../components/ProductCard';
-import CategoryPill from '../../components/CategoryPill';
 import LoadingScreen from '../../components/LoadingScreen';
 import { displayError } from '../../utilities/handleError';
 import { restartAppMessage } from '../../constants/errorMessages';
 
 const CATEGORIES = [
-  { emoji: '⭐', label: 'All' },
-  { emoji: '🥐', label: 'Bakery' },
-  { emoji: '☕', label: 'Cafe' },
-  { emoji: '🍱', label: 'Meals' },
-  { emoji: '🧃', label: 'Drinks' },
-  { emoji: '🛒', label: 'Grocery' },
+  { icon: '🥐', label: 'Bakery' },
+  { icon: '☕', label: 'Cafe' },
+  { icon: '🍱', label: 'Meals' },
+  { icon: '🥗', label: 'Salad' },
 ];
 
 /**
  * HomeScreen
  *
- * Main customer feed. Dark theme (#1a1a1a bg, #2a2a2a cards). Displays:
- * - Personalised greeting with first name from Supabase
- * - Location + search bar (dark glass style)
- * - Eco-impact banner (CO₂ saved, meals rescued)
- * - Category filter pills
- * - 2-column product card grid, filtered by selected category
- * - Pull-to-refresh support
+ * Main customer feed. Matches Premium Food Waste App Mock-up React Native design:
+ * - Logo + lime avatar header
+ * - Location row + search bar (whiteOpacity10 bg, icon left)
+ * - Deep green impact banner
+ * - 4-column category grid (whiteOpacity10 bg)
+ * - 2-column deal card grid (darkGray cards, orange discount badge, lime price, lime + circle)
  *
- * Uses `useAsyncWithTimeout` for products fetch and `useCarts.addItem` for cart actions.
- * Errors are handled via `displayError` per CLAUDE.md.
+ * Uses `useAsyncWithTimeout` for products, `useCarts.addItem` for cart.
  */
 export default function HomeScreen() {
   const router = useRouter();
-
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [firstName, setFirstName] = useState('');
   const [refreshing, setRefreshing] = useState(false);
@@ -114,15 +108,13 @@ export default function HomeScreen() {
     [addToCart],
   );
 
-  const filtered = (products ?? []).filter((p: Product) => {
-    const matchCategory =
-      selectedCategory === 'All' || p.category?.name === selectedCategory;
-    const matchSearch =
-      !searchQuery ||
-      p.product_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.business?.business_name ?? '').toLowerCase().includes(searchQuery.toLowerCase());
-    return matchCategory && matchSearch;
-  });
+  const filtered = (products ?? []).filter((p: Product) =>
+    !searchQuery ||
+    p.product_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (p.business?.business_name ?? '').toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
+  const initials = firstName ? firstName[0].toUpperCase() : '?';
 
   if (productsLoading && !products) {
     return <LoadingScreen message="Finding deals near you…" />;
@@ -130,14 +122,10 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.dark} />
-
-      <FlatList
-        data={filtered}
-        keyExtractor={(item) => item.id}
-        numColumns={2}
-        contentContainerStyle={styles.listContent}
-        columnWrapperStyle={styles.columnWrapper}
+      <StatusBar barStyle="light-content" backgroundColor={Colors.black} />
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -145,175 +133,293 @@ export default function HomeScreen() {
             tintColor={Colors.lime}
             colors={[Colors.lime]}
           />
-        }
-        ListHeaderComponent={
-          <>
-            <View style={styles.header}>
-              <View>
-                <Text style={styles.greeting}>
-                  {firstName ? `Hey, ${firstName} 👋` : 'Hey there 👋'}
-                </Text>
-                <View style={styles.locationRow}>
-                  <Text style={styles.locationPin}>📍</Text>
-                  <Text style={styles.location}>Wollongong · 2.5 km</Text>
-                </View>
-              </View>
-              <View style={styles.avatarBadge}>
-                <Text style={styles.avatarText}>{firstName ? firstName[0].toUpperCase() : '?'}</Text>
-              </View>
-            </View>
+        }>
 
-            <View style={styles.searchContainer}>
-              <Text style={styles.searchIcon}>🔍</Text>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Restaurant, bakery, or dish…"
-                placeholderTextColor="rgba(255,255,255,0.3)"
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                returnKeyType="search"
-              />
-            </View>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerTop}>
+            <Text style={styles.logoText}>zeroooh!</Text>
+            <TouchableOpacity style={styles.avatar}>
+              <Text style={styles.avatarText}>{initials}</Text>
+            </TouchableOpacity>
+          </View>
 
-            <View style={styles.impactBanner}>
-              <View style={styles.impactItem}>
-                <Text style={styles.impactValue}>2.4M+</Text>
-                <Text style={styles.impactLabel}>Meals rescued</Text>
-              </View>
-              <View style={styles.impactDivider} />
-              <View style={styles.impactItem}>
-                <Text style={styles.impactValue}>480t</Text>
-                <Text style={styles.impactLabel}>CO₂ saved</Text>
-              </View>
-              <View style={styles.impactDivider} />
-              <View style={styles.impactItem}>
-                <Text style={styles.impactValue}>1,200+</Text>
-                <Text style={styles.impactLabel}>Partners</Text>
-              </View>
-            </View>
+          {/* Location */}
+          <TouchableOpacity style={styles.location}>
+            <Ionicons name="location-outline" size={16} color={Colors.w90} />
+            <Text style={styles.locationText}>Wollongong • 2.5 km</Text>
+            <Text style={styles.locationArrow}>▼</Text>
+          </TouchableOpacity>
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.categoryRow}>
-              {CATEGORIES.map((cat) => (
-                <CategoryPill
-                  key={cat.label}
-                  emoji={cat.emoji}
-                  label={cat.label}
-                  active={selectedCategory === cat.label}
-                  onPress={() => setSelectedCategory(cat.label)}
-                />
-              ))}
-            </ScrollView>
+          {/* Search */}
+          <View style={styles.searchContainer}>
+            <Ionicons name="search-outline" size={20} color={Colors.w40} style={styles.searchIcon} />
+            <TextInput
+              placeholder="Restaurant, bakery, or dish..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              style={styles.searchInput}
+              placeholderTextColor={Colors.w40}
+            />
+          </View>
+        </View>
 
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>
-                {selectedCategory === 'All'
-                  ? '🔥 Hot Deals'
-                  : `${CATEGORIES.find((c) => c.label === selectedCategory)?.emoji} ${selectedCategory}`}
-              </Text>
-              <Text style={styles.sectionCount}>{filtered.length} available</Text>
-            </View>
+        {/* Impact Banner */}
+        <View style={styles.section}>
+          <View style={styles.impactBanner}>
+            <Text style={styles.impactLabel}>🌍 Your Impact</Text>
+            <Text style={styles.impactNumber}>7.6M</Text>
+            <Text style={styles.impactSubtext}>tonnes of food saved in Australia</Text>
+          </View>
+        </View>
+
+        {/* Categories */}
+        <View style={styles.section}>
+          <View style={styles.categoriesGrid}>
+            {CATEGORIES.map((category) => (
+              <TouchableOpacity key={category.label} style={styles.categoryItem}>
+                <Text style={styles.categoryIcon}>{category.icon}</Text>
+                <Text style={styles.categoryLabel}>{category.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View>
+
+        {/* Featured Deals */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Featured Deals</Text>
+
+          <View style={styles.dealsGrid}>
+            {filtered.map((deal) => {
+              const imageUrl = deal.images?.[0]?.image_url ?? null;
+              const discountPct = Math.round(
+                ((deal.original_price_cents - deal.discounted_price_cents) / deal.original_price_cents) * 100,
+              );
+              const salePrice = (deal.discounted_price_cents / 100).toFixed(2);
+              const origPrice = (deal.original_price_cents / 100).toFixed(2);
+
+              return (
+                <TouchableOpacity
+                  key={deal.id}
+                  onPress={() =>
+                    router.push({
+                      pathname: '/(customer_tabs)/product-detail',
+                      params: { productId: deal.id },
+                    })
+                  }
+                  style={styles.dealCard}>
+                  <View style={styles.dealImageContainer}>
+                    {imageUrl ? (
+                      <Image source={{ uri: imageUrl }} style={styles.dealImage} resizeMode="cover" />
+                    ) : (
+                      <View style={styles.dealImagePlaceholder}>
+                        <Text style={styles.dealImageEmoji}>🍱</Text>
+                      </View>
+                    )}
+                    {/* Discount badge */}
+                    <View style={styles.discountBadge}>
+                      <Text style={styles.discountText}>{discountPct}% OFF</Text>
+                    </View>
+                    {/* Rating badge */}
+                    <View style={styles.ratingBadge}>
+                      <Ionicons name="star" size={12} color={Colors.lime} />
+                      <Text style={styles.ratingText}>4.8</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.dealContent}>
+                    <Text style={styles.dealName} numberOfLines={1}>{deal.product_name}</Text>
+                    <Text style={styles.dealRestaurant} numberOfLines={1}>
+                      {deal.business?.business_name ?? 'Local Store'}
+                    </Text>
+                    <Text style={styles.dealPickup}>
+                      {deal.pickup_start ? `Today ${formatPickup(deal.pickup_start)}` : 'Pickup today'}
+                    </Text>
+
+                    <View style={styles.dealFooter}>
+                      <View style={styles.priceContainer}>
+                        <Text style={styles.dealPrice}>${salePrice}</Text>
+                        <Text style={styles.dealOriginalPrice}>${origPrice}</Text>
+                      </View>
+                      <TouchableOpacity
+                        style={styles.addButton}
+                        onPress={() => handleAddToCart(deal)}>
+                        <Ionicons name="add" size={20} color={Colors.black} strokeWidth={3} />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
 
             {filtered.length === 0 && !productsLoading && (
               <View style={styles.emptyState}>
                 <Text style={styles.emptyEmoji}>🍽️</Text>
                 <Text style={styles.emptyTitle}>No deals found</Text>
-                <Text style={styles.emptySubtitle}>
-                  {searchQuery ? 'Try a different search.' : 'Check back soon for new listings.'}
-                </Text>
+                <Text style={styles.emptySubtitle}>Check back soon for new listings.</Text>
               </View>
             )}
-          </>
-        }
-        renderItem={({ item }) => (
-          <ProductCard
-            product={item}
-            onPress={() =>
-              router.push({
-                pathname: '/(customer_tabs)/product-detail',
-                params: { productId: item.id },
-              })
-            }
-            onAddToCart={() => handleAddToCart(item)}
-          />
-        )}
-        showsVerticalScrollIndicator={false}
-      />
+          </View>
+        </View>
+
+        <View style={styles.bottomSpacer} />
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
+function formatPickup(start: string): string {
+  const s = new Date(start);
+  return s.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+}
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.dark },
-  listContent: { paddingBottom: Spacing.xl },
-  columnWrapper: {
-    paddingHorizontal: Spacing.lg,
-    justifyContent: 'space-between',
-    marginBottom: Spacing.sm,
-  },
+  container: { flex: 1, backgroundColor: Colors.black },
+  scrollView: { flex: 1 },
+  scrollContent: { paddingBottom: 100 },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.md,
-    paddingBottom: Spacing.sm,
+    backgroundColor: Colors.black,
+    paddingHorizontal: 20,
+    paddingTop: 48,
+    paddingBottom: 24,
   },
-  greeting: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.white, marginBottom: 2 },
-  locationRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
-  locationPin: { fontSize: 13 },
-  location: { fontSize: FontSize.sm, color: Colors.muted, fontWeight: '500' },
-  avatarBadge: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+  headerTop: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  logoText: { color: Colors.white, fontSize: 22, fontWeight: '800', letterSpacing: -0.5 },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: Colors.lime,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { fontSize: FontSize.lg, fontWeight: '800', color: Colors.dark },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    marginHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.lg,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm + 2,
-    gap: Spacing.sm,
-    marginBottom: Spacing.md,
+  avatarText: { color: Colors.black, fontSize: 14, fontWeight: '700' },
+  location: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 16 },
+  locationText: { color: Colors.w90, fontSize: 14, fontWeight: '600' },
+  locationArrow: { color: Colors.w90, fontSize: 10 },
+  searchContainer: { position: 'relative' },
+  searchIcon: { position: 'absolute', left: 16, top: 18, zIndex: 1 },
+  searchInput: {
+    width: '100%',
+    paddingLeft: 48,
+    paddingRight: 16,
+    paddingVertical: 16,
+    backgroundColor: Colors.w10,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.w20,
+    borderRadius: 16,
+    color: Colors.white,
+    fontSize: 16,
   },
-  searchIcon: { fontSize: 16 },
-  searchInput: { flex: 1, fontSize: FontSize.md, color: Colors.white, padding: 0 },
+  section: { paddingHorizontal: 20, paddingBottom: 20 },
   impactBanner: {
-    flexDirection: 'row',
-    backgroundColor: Colors.primary,
-    marginHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.md,
-    marginBottom: Spacing.md,
-    alignItems: 'center',
+    backgroundColor: Colors.deepGreen,
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: Colors.lime20,
   },
-  impactItem: { flex: 1, alignItems: 'center', gap: 2 },
-  impactValue: { fontSize: FontSize.md, fontWeight: '800', color: Colors.lime },
-  impactLabel: { fontSize: FontSize.xs - 1, color: 'rgba(255,255,255,0.65)', textAlign: 'center' },
-  impactDivider: { width: 1, height: 36, backgroundColor: 'rgba(255,255,255,0.15)' },
-  categoryRow: { paddingHorizontal: Spacing.lg, paddingBottom: Spacing.md, gap: Spacing.sm },
-  sectionHeader: {
+  impactLabel: {
+    color: Colors.lime,
+    fontSize: 14,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: 4,
+  },
+  impactNumber: { color: Colors.white, fontSize: 32, fontWeight: '900', lineHeight: 32 },
+  impactSubtext: { color: Colors.w80, fontSize: 14, fontWeight: '600' },
+  categoriesGrid: { flexDirection: 'row', gap: 12 },
+  categoryItem: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 8,
+    padding: 12,
+    borderRadius: 16,
+    backgroundColor: Colors.w10,
+    borderWidth: 1,
+    borderColor: Colors.w10,
+  },
+  categoryIcon: { fontSize: 32 },
+  categoryLabel: { color: Colors.white, fontSize: 13, fontWeight: '600' },
+  sectionTitle: {
+    color: Colors.white,
+    fontSize: 22,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    letterSpacing: -0.5,
+    marginBottom: 16,
+  },
+  dealsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  dealCard: {
+    width: '48%',
+    backgroundColor: Colors.darkGray,
+    borderRadius: 20,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: Colors.w10,
+  },
+  dealImageContainer: { height: 128, position: 'relative' },
+  dealImage: { width: '100%', height: '100%' },
+  dealImagePlaceholder: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: '#222222',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dealImageEmoji: { fontSize: 36 },
+  discountBadge: {
+    position: 'absolute',
+    top: 8,
+    left: 8,
+    backgroundColor: Colors.orange,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 9999,
+  },
+  discountText: { color: Colors.white, fontSize: 14, fontWeight: '900' },
+  ratingBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: Colors.black70,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 9999,
     flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  ratingText: { color: Colors.white, fontSize: 12, fontWeight: '700' },
+  dealContent: { padding: 12 },
+  dealName: { color: Colors.white, fontSize: 15, fontWeight: '700', marginBottom: 4 },
+  dealRestaurant: { color: Colors.w60, fontSize: 12, marginBottom: 8 },
+  dealPickup: { color: Colors.w60, fontSize: 11, fontWeight: '600', marginBottom: 12 },
+  dealFooter: {
+    flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
-    marginBottom: Spacing.sm,
   },
-  sectionTitle: { fontSize: FontSize.lg, fontWeight: '800', color: Colors.white },
-  sectionCount: { fontSize: FontSize.sm, color: Colors.muted, fontWeight: '500' },
-  emptyState: { alignItems: 'center', paddingVertical: Spacing.xxl },
-  emptyEmoji: { fontSize: 48, marginBottom: Spacing.md },
-  emptyTitle: { fontSize: FontSize.xl, fontWeight: '700', color: Colors.white, marginBottom: Spacing.xs },
-  emptySubtitle: { fontSize: FontSize.md, color: Colors.muted, textAlign: 'center' },
+  priceContainer: { flexDirection: 'row', alignItems: 'baseline', gap: 6 },
+  dealPrice: { color: Colors.lime, fontSize: 20, fontWeight: '900' },
+  dealOriginalPrice: { color: Colors.w30, fontSize: 12, textDecorationLine: 'line-through' },
+  addButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: Colors.lime,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  emptyState: { alignItems: 'center', paddingVertical: 48, width: '100%' },
+  emptyEmoji: { fontSize: 48, marginBottom: 16 },
+  emptyTitle: { fontSize: 20, fontWeight: '700', color: Colors.white, marginBottom: 8 },
+  emptySubtitle: { fontSize: 15, color: Colors.w60, textAlign: 'center' },
+  bottomSpacer: { height: 20 },
 });

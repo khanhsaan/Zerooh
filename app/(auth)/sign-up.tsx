@@ -107,6 +107,8 @@ export default function SignUpScreen() {
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
+                textContentType="oneTimeCode"
+                autoComplete="off"
               />
               <TouchableOpacity
                 style={styles.eyeButton}
@@ -129,6 +131,8 @@ export default function SignUpScreen() {
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry={!showConfirmPassword}
+                textContentType="oneTimeCode"
+                autoComplete="off"
               />
               <TouchableOpacity
                 style={styles.eyeButton}

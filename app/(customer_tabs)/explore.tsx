@@ -1,9 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, SafeAreaView, StatusBar,
-  FlatList, Image,
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  StatusBar,
+  ScrollView,
+  TouchableOpacity,
+  Image,
 } from 'react-native';
-import { Colors, Spacing, BorderRadius, FontSize } from '../../constants/Colors';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors } from '../../constants/Colors';
 import { useProducts } from '../../hooks/useProducts';
 import { useAsyncWithTimeout } from '../../hooks/useAsyncWithTimeout';
 import { Product } from '../../types';
@@ -11,16 +18,18 @@ import LoadingScreen from '../../components/LoadingScreen';
 import { displayError } from '../../utilities/handleError';
 
 /**
- * MapScreen
+ * ExploreScreen (Map)
  *
- * Dark theme (#1a1a1a bg). Explore screen showing nearby food businesses and
- * their available deals. Displays a mock location banner (map integration is
- * a v2 feature). Lists participating stores with deal counts and thumbnails.
- *
- * Uses `useProducts` grouped by business to build the store list.
- * Uses `useAsyncWithTimeout` for loading state management.
+ * Matches the Map mockup exactly:
+ * - UPPERCASE "Checkout" / "Explore" header with back button
+ * - darkGray map placeholder (256px) with lime circle marker pin at centre
+ * - "Pickup Location" section: lime location card with business name + address + pickup time pill
+ * - darkGray "Order Summary" card with lime total + lime border-top
+ * - Lime "Confirm & Pay" button at bottom
  */
-const MapScreen: React.FC = () => {
+const ExploreScreen: React.FC = () => {
+  const [orderConfirmed, setOrderConfirmed] = useState(false);
+
   const productsHook = useProducts();
   const getProducts = productsHook.data?.getProducts;
 
@@ -51,183 +60,300 @@ const MapScreen: React.FC = () => {
 
   if (loading && !products) return <LoadingScreen message="Finding stores near you…" />;
 
+  if (orderConfirmed) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor={Colors.black} />
+        <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+          <View style={styles.header}>
+            <View style={styles.headerRow}>
+              <TouchableOpacity onPress={() => setOrderConfirmed(false)} style={styles.backButton}>
+                <Ionicons name="arrow-back" size={20} color={Colors.white} />
+              </TouchableOpacity>
+              <Text style={styles.headerTitle}>Success</Text>
+            </View>
+          </View>
+
+          <View style={styles.successContent}>
+            <View style={styles.successIcon}>
+              <Ionicons name="checkmark" size={64} color={Colors.black} />
+            </View>
+            <Text style={styles.successTitle}>Order Confirmed!</Text>
+            <Text style={styles.successSubtitle}>Your rescue bags are ready for pickup</Text>
+
+            <View style={styles.orderNumberCard}>
+              <Text style={styles.orderNumberLabel}>Order Number</Text>
+              <Text style={styles.orderNumber}>#8742</Text>
+            </View>
+
+            <View style={styles.pickupInfo}>
+              <Text style={styles.pickupInfoTitle}>Pickup Info</Text>
+              <View style={styles.pickupInfoList}>
+                <Text style={styles.pickupInfoItem}>• Show your order number to staff</Text>
+                <Text style={styles.pickupInfoItem}>• Pickup: Today, 5:00 - 6:30 PM</Text>
+                <Text style={styles.pickupInfoItem}>• 123 Baker Street, Wollongong</Text>
+              </View>
+            </View>
+
+            <TouchableOpacity
+              style={styles.ctaButton}
+              onPress={() => setOrderConfirmed(false)}
+              activeOpacity={0.85}>
+              <Text style={styles.ctaButtonText}>Back to Home</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.dark} />
-
-      {/* Map placeholder */}
-      <View style={styles.mapArea}>
-        <View style={styles.mapPlaceholder}>
-          <Text style={styles.mapEmoji}>🗺️</Text>
-          <Text style={styles.mapText}>Wollongong & Sydney</Text>
-          <Text style={styles.mapSubtext}>Interactive map — coming soon</Text>
-        </View>
-
-        {/* Store pins overlay */}
-        <View style={styles.pinsRow}>
-          {stores.slice(0, 4).map((store, i) => (
-            <View key={i} style={[styles.pin, i % 2 === 0 ? styles.pinGreen : styles.pinLime]}>
-              <Text style={styles.pinText}>🏪</Text>
-              <Text style={[styles.pinLabel, i % 2 !== 0 && styles.pinLabelDark]} numberOfLines={1}>
-                {store.business.business_name}
-              </Text>
+      <StatusBar barStyle="light-content" backgroundColor={Colors.black} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View style={styles.headerRow}>
+            <View style={styles.backButton}>
+              <Ionicons name="map-outline" size={20} color={Colors.white} />
             </View>
-          ))}
+            <Text style={styles.headerTitle}>Explore</Text>
+          </View>
         </View>
-      </View>
 
-      {/* Nearby stores list */}
-      <View style={styles.bottomSheet}>
-        <View style={styles.bottomSheetHandle} />
-        <Text style={styles.sheetTitle}>Nearby Stores 📍</Text>
-        <Text style={styles.sheetSubtitle}>{stores.length} store{stores.length !== 1 ? 's' : ''} with active deals</Text>
+        {/* Map Placeholder */}
+        <View style={styles.mapPlaceholder}>
+          <Ionicons name="location-outline" size={64} color={Colors.w10} />
+          <Text style={styles.mapPlaceholderText}>Map View</Text>
+          <View style={styles.mapMarker}>
+            <Ionicons name="location" size={28} color={Colors.black} />
+          </View>
+        </View>
 
-        <FlatList
-          data={stores}
-          keyExtractor={(_, i) => i.toString()}
-          contentContainerStyle={styles.storeList}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
+        {/* Nearby Stores */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Nearby Stores</Text>
+
+          {stores.length === 0 && !loading && (
             <View style={styles.emptyState}>
               <Text style={styles.emptyEmoji}>🏪</Text>
               <Text style={styles.emptyTitle}>No stores nearby</Text>
               <Text style={styles.emptySubtitle}>Check back soon!</Text>
             </View>
-          }
-          renderItem={({ item: store }) => {
+          )}
+
+          {stores.map((store, i) => {
             const firstImg = store.products[0]?.images?.[0]?.image_url ?? null;
             const minPrice = Math.min(...store.products.map((p: Product) => p.discounted_price_cents));
             return (
-              <View style={styles.storeCard}>
-                <View style={styles.storeImageContainer}>
-                  {firstImg ? (
-                    <Image source={{ uri: firstImg }} style={styles.storeImage} resizeMode="cover" />
-                  ) : (
-                    <View style={styles.storeImagePlaceholder}>
-                      <Text style={styles.storeImageEmoji}>🏪</Text>
-                    </View>
-                  )}
-                </View>
-                <View style={styles.storeDetails}>
-                  <Text style={styles.storeName}>{store.business.business_name}</Text>
-                  <Text style={styles.storeAddress} numberOfLines={1}>
-                    {store.business.suburb ? `${store.business.suburb}, ${store.business.postcode}` : 'Local area'}
+              <View key={i} style={styles.locationCard}>
+                <Text style={styles.locationName}>{store.business.business_name}</Text>
+                <View style={styles.addressRow}>
+                  <Ionicons name="location" size={16} color={Colors.black70} />
+                  <Text style={styles.addressText}>
+                    {store.business.suburb
+                      ? `${store.business.suburb}, ${store.business.postcode}`
+                      : 'Local area'}
                   </Text>
-                  <View style={styles.storeMetaRow}>
-                    <View style={styles.dealCountBadge}>
-                      <Text style={styles.dealCountText}>{store.products.length} deal{store.products.length !== 1 ? 's' : ''}</Text>
-                    </View>
-                    <Text style={styles.storeDistance}>≈ 1.2 km</Text>
-                  </View>
                 </View>
-                <View style={styles.storePriceBlock}>
-                  <Text style={styles.storePriceFrom}>from</Text>
-                  <Text style={styles.storePrice}>${(minPrice / 100).toFixed(2)}</Text>
+                <View style={styles.locationMeta}>
+                  <View style={styles.pickupTimePill}>
+                    <Text style={styles.pickupTimeText}>
+                      {store.products.length} deal{store.products.length !== 1 ? 's' : ''} · from ${(minPrice / 100).toFixed(2)}
+                    </Text>
+                  </View>
                 </View>
               </View>
             );
-          }}
-        />
-      </View>
+          })}
+        </View>
+
+        {/* Order Summary */}
+        <View style={styles.section}>
+          <View style={styles.summaryCard}>
+            <Text style={styles.summaryTitle}>Order Summary</Text>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>{stores.length} stores nearby</Text>
+              <Text style={styles.summaryValue}>{stores.reduce((s, st) => s + st.products.length, 0)} deals</Text>
+            </View>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Delivery</Text>
+              <Text style={styles.summaryFree}>Free</Text>
+            </View>
+          </View>
+        </View>
+
+        <View style={styles.bottomSpacer} />
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.dark },
-  mapArea: {
-    height: 220,
-    backgroundColor: '#0d2d1a',
-    margin: Spacing.lg,
-    borderRadius: BorderRadius.xl,
-    overflow: 'hidden',
+  container: { flex: 1, backgroundColor: Colors.black },
+  scrollView: { flex: 1 },
+  scrollContent: { paddingBottom: 100 },
+  header: { paddingHorizontal: 20, paddingTop: 48, paddingBottom: 20 },
+  headerRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  backButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.w10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerTitle: {
+    color: Colors.white,
+    fontSize: 28,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+  },
+  mapPlaceholder: {
+    height: 256,
+    backgroundColor: Colors.darkGray,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: Colors.w10,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
-    borderWidth: 1,
-    borderColor: Colors.border,
   },
-  mapPlaceholder: { alignItems: 'center', gap: 4 },
-  mapEmoji: { fontSize: 48, marginBottom: 4 },
-  mapText: { fontSize: FontSize.lg, fontWeight: '700', color: Colors.lime },
-  mapSubtext: { fontSize: FontSize.sm, color: Colors.muted },
-  pinsRow: {
+  mapPlaceholderText: { color: Colors.w30, fontSize: 16, fontWeight: '600' },
+  mapMarker: {
     position: 'absolute',
-    bottom: 12,
-    left: 12,
-    right: 12,
-    flexDirection: 'row',
-    gap: 8,
-    flexWrap: 'wrap',
-  },
-  pin: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: BorderRadius.full,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    gap: 4,
-    maxWidth: 130,
-  },
-  pinGreen: { backgroundColor: Colors.primary },
-  pinLime: { backgroundColor: Colors.lime },
-  pinText: { fontSize: 13 },
-  pinLabel: { fontSize: FontSize.xs, fontWeight: '700', color: Colors.white, flexShrink: 1 },
-  pinLabelDark: { color: Colors.dark },
-  bottomSheet: {
-    flex: 1,
-    backgroundColor: Colors.darkCard,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.sm,
-    borderTopWidth: 1,
-    borderTopColor: Colors.border,
-  },
-  bottomSheetHandle: {
-    width: 40,
-    height: 4,
-    backgroundColor: Colors.border,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: Spacing.sm,
-  },
-  sheetTitle: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.white },
-  sheetSubtitle: { fontSize: FontSize.sm, color: Colors.muted, marginBottom: Spacing.md },
-  storeList: { gap: Spacing.sm, paddingBottom: Spacing.xxl },
-  emptyState: { alignItems: 'center', paddingVertical: Spacing.xxl, gap: Spacing.sm },
-  emptyEmoji: { fontSize: 48 },
-  emptyTitle: { fontSize: FontSize.xl, fontWeight: '700', color: Colors.white },
-  emptySubtitle: { fontSize: FontSize.md, color: Colors.muted },
-  storeCard: {
-    flexDirection: 'row',
-    backgroundColor: Colors.dark,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.md,
-    alignItems: 'center',
-    gap: Spacing.sm,
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  storeImageContainer: { width: 60, height: 60, borderRadius: BorderRadius.md, overflow: 'hidden' },
-  storeImage: { width: '100%', height: '100%' },
-  storeImagePlaceholder: { flex: 1, backgroundColor: '#222222', alignItems: 'center', justifyContent: 'center' },
-  storeImageEmoji: { fontSize: 28 },
-  storeDetails: { flex: 1 },
-  storeName: { fontSize: FontSize.md, fontWeight: '700', color: Colors.white },
-  storeAddress: { fontSize: FontSize.xs, color: Colors.muted, marginTop: 2 },
-  storeMetaRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginTop: 4 },
-  dealCountBadge: {
+    width: 48,
+    height: 48,
     backgroundColor: Colors.lime,
-    borderRadius: BorderRadius.full,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  dealCountText: { fontSize: FontSize.xs, fontWeight: '700', color: Colors.dark },
-  storeDistance: { fontSize: FontSize.xs, color: Colors.muted },
-  storePriceBlock: { alignItems: 'flex-end' },
-  storePriceFrom: { fontSize: FontSize.xs, color: Colors.muted },
-  storePrice: { fontSize: FontSize.lg, fontWeight: '800', color: Colors.lime },
+  section: { paddingHorizontal: 20, paddingVertical: 24 },
+  sectionTitle: {
+    color: Colors.white,
+    fontSize: 22,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    marginBottom: 16,
+  },
+  emptyState: { alignItems: 'center', paddingVertical: 32, gap: 12 },
+  emptyEmoji: { fontSize: 48 },
+  emptyTitle: { fontSize: 20, fontWeight: '700', color: Colors.white },
+  emptySubtitle: { fontSize: 15, color: Colors.w60 },
+  locationCard: {
+    backgroundColor: Colors.lime,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 12,
+  },
+  locationName: { color: Colors.black, fontSize: 20, fontWeight: '900', marginBottom: 8 },
+  addressRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 8, marginBottom: 12 },
+  addressText: { color: Colors.black70, fontSize: 15, fontWeight: '600', flex: 1 },
+  locationMeta: { flexDirection: 'row' },
+  pickupTimePill: {
+    backgroundColor: Colors.black,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  pickupTimeText: { color: Colors.lime, fontSize: 14, fontWeight: '700' },
+  summaryCard: {
+    backgroundColor: Colors.darkGray,
+    borderWidth: 1,
+    borderColor: Colors.w10,
+    borderRadius: 20,
+    padding: 20,
+  },
+  summaryTitle: {
+    color: Colors.white,
+    fontSize: 18,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    marginBottom: 16,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  summaryLabel: { color: Colors.w70, fontSize: 15, fontWeight: '600' },
+  summaryValue: { color: Colors.white, fontSize: 15, fontWeight: '700' },
+  summaryFree: { color: Colors.lime, fontSize: 15, fontWeight: '900' },
+  bottomSpacer: { height: 40 },
+  // Success screen styles
+  successContent: { paddingHorizontal: 20, paddingVertical: 48, alignItems: 'center' },
+  successIcon: {
+    width: 112,
+    height: 112,
+    borderRadius: 56,
+    backgroundColor: Colors.lime,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  successTitle: {
+    color: Colors.white,
+    fontSize: 36,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    marginBottom: 8,
+  },
+  successSubtitle: {
+    color: Colors.w60,
+    fontSize: 17,
+    fontWeight: '600',
+    marginBottom: 40,
+  },
+  orderNumberCard: {
+    backgroundColor: Colors.deepGreen,
+    borderRadius: 22,
+    padding: 24,
+    width: '100%',
+    marginBottom: 32,
+    borderWidth: 1,
+    borderColor: Colors.lime20,
+  },
+  orderNumberLabel: {
+    color: Colors.lime,
+    fontSize: 14,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    marginBottom: 4,
+  },
+  orderNumber: { color: Colors.white, fontSize: 48, fontWeight: '900' },
+  pickupInfo: {
+    backgroundColor: Colors.w10,
+    borderWidth: 1,
+    borderColor: Colors.w10,
+    borderRadius: 20,
+    padding: 20,
+    width: '100%',
+    marginBottom: 32,
+  },
+  pickupInfoTitle: {
+    color: Colors.white,
+    fontSize: 18,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    marginBottom: 12,
+  },
+  pickupInfoList: { gap: 10 },
+  pickupInfoItem: { color: Colors.w70, fontSize: 15, fontWeight: '600' },
+  ctaButton: {
+    backgroundColor: Colors.lime,
+    borderRadius: 16,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  ctaButtonText: {
+    color: Colors.black,
+    fontSize: 17,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
 });
 
-export default MapScreen;
+export default ExploreScreen;

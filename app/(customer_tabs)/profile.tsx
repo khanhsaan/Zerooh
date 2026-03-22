@@ -1,9 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, SafeAreaView, StatusBar,
-  TouchableOpacity, Alert, ActivityIndicator, ScrollView,
+  View,
+  Text,
+  StyleSheet,
+  SafeAreaView,
+  StatusBar,
+  TouchableOpacity,
+  Alert,
+  ActivityIndicator,
+  ScrollView,
 } from 'react-native';
-import { Colors, Spacing, BorderRadius, FontSize } from '../../constants/Colors';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors } from '../../constants/Colors';
 import { useProfile } from '../../hooks/useProfile';
 import useAuth from '../../hooks/useAuth';
 import LoadingScreen from '../../components/LoadingScreen';
@@ -12,15 +20,11 @@ import { displayError } from '../../utilities/handleError';
 /**
  * ProfileScreen
  *
- * Dark theme (#1a1a1a bg, #2a2a2a cards). Customer account screen displaying:
- * - Lime avatar initials badge (generated from first name)
- * - First name, email address
- * - Green gradient impact stats card (meals rescued, CO₂ saved, total saved)
- * - Dark menu items with lime icon backgrounds
- * - Sign out button (orange styling)
- *
- * Uses `useProfile` to fetch name/email and `useAuth.signOutHandle` to log out.
- * Errors surface via Alert using `displayError`.
+ * Matches the Profile mockup exactly:
+ * - UPPERCASE "Account" header, then left-aligned profileRow (80px lime avatar + name/email)
+ * - deepGreen impact card with 3-col stats grid (orders, saved, CO₂)
+ * - darkGray menu items with lime icon containers (44×44)
+ * - Orange-styled sign out row (orange text, orangeOpacity20 icon bg, orange30 border)
  */
 const ProfileScreen: React.FC = () => {
   const [firstName, setFirstName] = useState('');
@@ -63,7 +67,6 @@ const ProfileScreen: React.FC = () => {
           const result = await signOut();
           setSigningOut(false);
           if (result.error) displayError(result.error.message, result.error.isFatal);
-          // Auth state change triggers navigation automatically
         },
       },
     ]);
@@ -71,168 +74,195 @@ const ProfileScreen: React.FC = () => {
 
   if (loading) return <LoadingScreen message="Loading profile…" />;
 
-  const initials = firstName ? firstName[0].toUpperCase() : '?';
+  const initials = firstName
+    ? firstName
+        .trim()
+        .split(' ')
+        .map((w) => w[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    : '?';
+
+  const menuItems = [
+    { icon: 'settings-outline' as const, label: 'Settings' },
+    { icon: 'time-outline' as const, label: 'Order History' },
+    { icon: 'heart-outline' as const, label: 'Favourites' },
+    { icon: 'help-circle-outline' as const, label: 'Help' },
+  ];
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.dark} />
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <StatusBar barStyle="light-content" backgroundColor={Colors.black} />
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
 
-        {/* Avatar */}
-        <View style={styles.avatarSection}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{initials}</Text>
-          </View>
-          <Text style={styles.name}>{firstName || 'Food Rescuer'}</Text>
-          <Text style={styles.email}>{email}</Text>
-          <View style={styles.memberBadge}>
-            <Text style={styles.memberBadgeText}>🌿 Eco Member</Text>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.headerTitle}>Account</Text>
+
+          <View style={styles.profileRow}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>{initials}</Text>
+            </View>
+            <View>
+              <Text style={styles.name}>{firstName || 'Food Rescuer'}</Text>
+              <Text style={styles.email}>{email}</Text>
+            </View>
           </View>
         </View>
 
-        {/* Impact stats — green gradient card */}
-        <View style={styles.statsCard}>
-          <Text style={styles.statsTitle}>Your Impact</Text>
-          <View style={styles.statsRow}>
-            {[
-              { emoji: '🍱', value: '0', label: 'Meals rescued' },
-              { emoji: '💨', value: '0g', label: 'CO₂ saved' },
-              { emoji: '💰', value: '$0', label: 'Total saved' },
-            ].map((stat, i) => (
-              <View key={i} style={styles.statItem}>
-                <Text style={styles.statEmoji}>{stat.emoji}</Text>
-                <Text style={styles.statValue}>{stat.value}</Text>
-                <Text style={styles.statLabel}>{stat.label}</Text>
+        <View style={styles.section}>
+          {/* Impact Card */}
+          <View style={styles.impactCard}>
+            <Text style={styles.impactLabel}>🌍 Your Impact</Text>
+
+            <View style={styles.statsGrid}>
+              <View style={styles.statItem}>
+                <Text style={styles.statNumber}>0</Text>
+                <Text style={styles.statLabel}>Orders</Text>
               </View>
+              <View style={styles.statItem}>
+                <Text style={[styles.statNumber, { color: Colors.orange }]}>$0</Text>
+                <Text style={styles.statLabel}>Saved</Text>
+              </View>
+              <View style={styles.statItem}>
+                <Text style={[styles.statNumber, { color: Colors.lime }]}>0kg</Text>
+                <Text style={styles.statLabel}>CO₂</Text>
+              </View>
+            </View>
+
+            <View style={styles.impactMessage}>
+              <Text style={styles.impactMessageText}>
+                🎉 Start ordering to track your food rescue impact!
+              </Text>
+            </View>
+          </View>
+
+          {/* Menu Items */}
+          <View style={styles.menuItems}>
+            {menuItems.map((item) => (
+              <TouchableOpacity key={item.label} style={styles.menuItem} activeOpacity={0.7}>
+                <View style={styles.menuIconContainer}>
+                  <Ionicons name={item.icon} size={20} color={Colors.black} />
+                </View>
+                <Text style={styles.menuLabel}>{item.label}</Text>
+                <Text style={styles.menuArrow}>›</Text>
+              </TouchableOpacity>
             ))}
+
+            {/* Sign Out */}
+            <TouchableOpacity
+              style={styles.menuItemLogout}
+              onPress={handleSignOut}
+              disabled={signingOut}
+              activeOpacity={0.7}>
+              <View style={styles.menuIconContainerLogout}>
+                {signingOut ? (
+                  <ActivityIndicator color={Colors.orange} size="small" />
+                ) : (
+                  <Ionicons name="log-out-outline" size={20} color={Colors.orange} />
+                )}
+              </View>
+              <Text style={styles.menuLabelLogout}>Sign Out</Text>
+            </TouchableOpacity>
           </View>
         </View>
-
-        {/* Menu items */}
-        <View style={styles.menuSection}>
-          {[
-            { icon: '👤', label: 'Edit Profile' },
-            { icon: '🔔', label: 'Notifications' },
-            { icon: '📍', label: 'Saved Addresses' },
-            { icon: '❓', label: 'Help & Support' },
-            { icon: 'ℹ️', label: 'About Zeroooh!' },
-          ].map((item, i, arr) => (
-            <TouchableOpacity
-              key={i}
-              style={[styles.menuItem, i < arr.length - 1 && styles.menuItemBorder]}
-              activeOpacity={0.7}>
-              <View style={styles.menuIconBadge}>
-                <Text style={styles.menuIcon}>{item.icon}</Text>
-              </View>
-              <Text style={styles.menuLabel}>{item.label}</Text>
-              <Text style={styles.menuArrow}>›</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* Sign out */}
-        <TouchableOpacity
-          style={[styles.signOutButton, signingOut && styles.disabled]}
-          onPress={handleSignOut}
-          disabled={signingOut}
-          activeOpacity={0.85}>
-          {signingOut ? (
-            <ActivityIndicator color={Colors.white} />
-          ) : (
-            <Text style={styles.signOutText}>Sign Out</Text>
-          )}
-        </TouchableOpacity>
-
-        <Text style={styles.version}>Zeroooh! v1.0.0 · Save food, save the planet</Text>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.dark },
-  scroll: { paddingBottom: Spacing.xxl },
-  avatarSection: { alignItems: 'center', paddingVertical: Spacing.xl, paddingTop: Spacing.xxl },
+  container: { flex: 1, backgroundColor: Colors.black },
+  scrollView: { flex: 1 },
+  scrollContent: { paddingBottom: 100 },
+  header: { paddingHorizontal: 20, paddingTop: 48, paddingBottom: 32 },
+  headerTitle: {
+    color: Colors.white,
+    fontSize: 32,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    marginBottom: 24,
+  },
+  profileRow: { flexDirection: 'row', alignItems: 'center', gap: 16 },
   avatar: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
+    width: 80,
+    height: 80,
+    borderRadius: 40,
     backgroundColor: Colors.lime,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: Spacing.md,
-    shadowColor: Colors.lime,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 4,
   },
-  avatarText: { fontSize: FontSize.huge, fontWeight: '900', color: Colors.dark },
-  name: { fontSize: FontSize.xxl, fontWeight: '800', color: Colors.white, marginBottom: 4 },
-  email: { fontSize: FontSize.md, color: Colors.muted, marginBottom: Spacing.sm },
-  memberBadge: {
-    backgroundColor: Colors.primary,
-    borderRadius: BorderRadius.full,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.xs,
-  },
-  memberBadgeText: { fontSize: FontSize.sm, fontWeight: '700', color: Colors.white },
-  statsCard: {
-    backgroundColor: Colors.primary,
-    marginHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.lg,
-    padding: Spacing.lg,
-    marginBottom: Spacing.md,
-  },
-  statsTitle: { fontSize: FontSize.md, fontWeight: '700', color: 'rgba(255,255,255,0.8)', marginBottom: Spacing.md },
-  statsRow: { flexDirection: 'row', justifyContent: 'space-around' },
-  statItem: { alignItems: 'center', gap: 4 },
-  statEmoji: { fontSize: 22 },
-  statValue: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.lime },
-  statLabel: { fontSize: FontSize.xs, color: 'rgba(255,255,255,0.65)', textAlign: 'center' },
-  menuSection: {
-    backgroundColor: Colors.darkCard,
-    marginHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.lg,
-    overflow: 'hidden',
-    marginBottom: Spacing.lg,
+  avatarText: { color: Colors.black, fontSize: 30, fontWeight: '900' },
+  name: { color: Colors.white, fontSize: 22, fontWeight: '900', marginBottom: 2 },
+  email: { color: Colors.w60, fontSize: 15, fontWeight: '600' },
+  section: { paddingHorizontal: 20, paddingVertical: 24 },
+  impactCard: {
+    backgroundColor: Colors.deepGreen,
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 24,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Colors.lime20,
   },
+  impactLabel: {
+    color: Colors.lime,
+    fontSize: 14,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    marginBottom: 8,
+  },
+  statsGrid: { flexDirection: 'row', gap: 16, marginBottom: 16 },
+  statItem: { flex: 1, alignItems: 'center' },
+  statNumber: { color: Colors.white, fontSize: 32, fontWeight: '900' },
+  statLabel: { color: Colors.w70, fontSize: 13, fontWeight: '700' },
+  impactMessage: {
+    backgroundColor: Colors.w10,
+    borderRadius: 14,
+    padding: 12,
+  },
+  impactMessageText: { color: Colors.white, fontSize: 14, fontWeight: '700' },
+  menuItems: { gap: 8 },
   menuItem: {
+    backgroundColor: Colors.darkGray,
+    borderWidth: 1,
+    borderColor: Colors.w10,
+    borderRadius: 16,
+    padding: 16,
     flexDirection: 'row',
     alignItems: 'center',
-    padding: Spacing.md,
-    gap: Spacing.md,
+    gap: 16,
   },
-  menuItemBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
-  },
-  menuIconBadge: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: 'rgba(217,224,33,0.15)',
+  menuIconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: Colors.lime,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  menuIcon: { fontSize: 18 },
-  menuLabel: { flex: 1, fontSize: FontSize.md, color: Colors.white, fontWeight: '500' },
-  menuArrow: { fontSize: 20, color: Colors.muted },
-  signOutButton: {
-    marginHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    alignItems: 'center',
-    backgroundColor: 'rgba(255,107,53,0.15)',
+  menuLabel: { flex: 1, color: Colors.white, fontSize: 16, fontWeight: '700' },
+  menuArrow: { color: Colors.w30, fontSize: 24 },
+  menuItemLogout: {
+    backgroundColor: Colors.darkGray,
     borderWidth: 1,
-    borderColor: 'rgba(255,107,53,0.3)',
-    marginBottom: Spacing.md,
+    borderColor: Colors.orange30,
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginTop: 16,
   },
-  disabled: { opacity: 0.7 },
-  signOutText: { fontSize: FontSize.lg, fontWeight: '700', color: Colors.orange },
-  version: { textAlign: 'center', fontSize: FontSize.xs, color: Colors.muted },
+  menuIconContainerLogout: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: Colors.orange20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuLabelLogout: { flex: 1, color: Colors.orange, fontSize: 16, fontWeight: '700' },
 });
 
 export default ProfileScreen;

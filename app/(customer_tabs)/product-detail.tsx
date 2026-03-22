@@ -4,49 +4,42 @@ import {
   Text,
   Image,
   StyleSheet,
-  SafeAreaView,
   StatusBar,
   ScrollView,
   TouchableOpacity,
   Alert,
   ActivityIndicator,
-  Dimensions,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { Colors, Spacing, BorderRadius, FontSize } from '../../constants/Colors';
+import { Ionicons } from '@expo/vector-icons';
+import { Colors } from '../../constants/Colors';
 import { useProducts } from '../../hooks/useProducts';
 import { useCarts } from '../../hooks/useCarts';
 import { useAsyncWithTimeout } from '../../hooks/useAsyncWithTimeout';
 import { Product } from '../../types';
-import DealBadge from '../../components/DealBadge';
 import LoadingScreen from '../../components/LoadingScreen';
 import { displayError } from '../../utilities/handleError';
 import { restartAppMessage } from '../../constants/errorMessages';
 
-const { width } = Dimensions.get('window');
-
 /**
  * ProductDetailScreen
  *
- * Dark theme (#1a1a1a). Shows full product information for a selected deal:
- * - Full-width hero image (or emoji placeholder)
+ * Matches the ProductDetail mockup exactly:
+ * - 320px hero image with header buttons (back left, heart right) over image
  * - Orange discount badge bottom-right of image
- * - Back button (dark glass) top-left
- * - Product name, business name, description
- * - Lime discounted price + strikethrough original
- * - Pickup window, stock indicator
- * - Quantity selector (dark bg)
- * - "You rescued N meal(s)" eco message
- * - Lime "ADD TO CART" sticky CTA
- *
- * Fetches product by ID via `useProducts.getProductById`.
- * `productId` is received as a string search param from Expo Router.
+ * - Flat content on black background (no rounded card overlay)
+ * - Title + lime rating pill in a row
+ * - Info pills with Ionicons and w10 background
+ * - Description section (UPPERCASE label)
+ * - Deep green environmental impact card
+ * - Bottom bar: lime price + strikethrough original, qty control pill, lime "Add to Cart" button
  */
 export default function ProductDetailScreen() {
   const router = useRouter();
   const { productId } = useLocalSearchParams<{ productId: string }>();
 
   const [quantity, setQuantity] = useState(1);
+  const [isFavorite, setIsFavorite] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
 
   const productsHook = useProducts();
@@ -78,7 +71,7 @@ export default function ProductDetailScreen() {
     if (result.error) {
       Alert.alert('Error', result.error.message);
     } else {
-      Alert.alert('🎉 Added to cart!', `${quantity}× ${product.product_name} added.`);
+      Alert.alert('Added to cart!', `${quantity}× ${product.product_name} added.`);
     }
   };
 
@@ -96,13 +89,13 @@ export default function ProductDetailScreen() {
   const pickupLabel = product.pickup_start
     ? formatPickup(product.pickup_start, product.pickup_end)
     : 'Pickup today';
-  const totalPrice = ((product.discounted_price_cents * quantity) / 100).toFixed(2);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scroll}>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.scrollContent}>
+        {/* Image Section */}
         <View style={styles.imageContainer}>
           {imageUrl ? (
             <Image source={{ uri: imageUrl }} style={styles.image} resizeMode="cover" />
@@ -112,101 +105,118 @@ export default function ProductDetailScreen() {
             </View>
           )}
 
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Text style={styles.backButtonText}>←</Text>
-          </TouchableOpacity>
+          {/* Header Buttons */}
+          <View style={styles.headerButtons}>
+            <TouchableOpacity onPress={() => router.back()} style={styles.headerButton}>
+              <Ionicons name="arrow-back" size={20} color={Colors.white} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => setIsFavorite(!isFavorite)} style={styles.headerButton}>
+              <Ionicons
+                name={isFavorite ? 'heart' : 'heart-outline'}
+                size={20}
+                color={isFavorite ? Colors.orange : Colors.white}
+              />
+            </TouchableOpacity>
+          </View>
 
+          {/* Discount Badge */}
           {discountPct > 0 && (
-            <View style={styles.discountChip}>
-              <Text style={styles.discountChipText}>{discountPct}% off</Text>
+            <View style={styles.discountBadge}>
+              <Text style={styles.discountText}>{discountPct}% OFF</Text>
             </View>
           )}
         </View>
 
-        <View style={styles.contentCard}>
-          <View style={styles.badgesRow}>
-            {discountPct >= 50 && <DealBadge variant="popular" />}
-            {product.stock <= 3 && product.stock > 0 && (
-              <DealBadge variant="lastChance" label={`${product.stock} left`} />
-            )}
-            <DealBadge variant="ecoPick" />
+        {/* Content */}
+        <View style={styles.content}>
+          {/* Title & Rating */}
+          <View style={styles.titleSection}>
+            <View style={styles.titleContainer}>
+              <Text style={styles.title}>{product.product_name}</Text>
+              <Text style={styles.restaurant}>{businessName}</Text>
+            </View>
+            <View style={styles.ratingContainer}>
+              <Ionicons name="star" size={16} color={Colors.black} />
+              <Text style={styles.ratingText}>4.8</Text>
+            </View>
           </View>
 
-          <Text style={styles.productName}>{product.product_name}</Text>
-          <Text style={styles.businessName}>🏪 {businessName}</Text>
-
-          <Text style={styles.description}>{product.long_description || product.short_description}</Text>
-
-          <View style={styles.infoRow}>
-            <Text style={styles.infoIcon}>🕐</Text>
-            <Text style={styles.infoText}>Pickup: {pickupLabel}</Text>
+          {/* Info Pills */}
+          <View style={styles.infoPills}>
+            <View style={styles.infoPill}>
+              <Ionicons name="location-outline" size={16} color={Colors.lime} />
+              <Text style={styles.infoPillText}>0.5 km</Text>
+            </View>
+            <View style={styles.infoPill}>
+              <Ionicons name="time-outline" size={16} color={Colors.lime} />
+              <Text style={styles.infoPillText}>{pickupLabel}</Text>
+            </View>
           </View>
 
-          <View style={styles.infoRow}>
-            <Text style={styles.infoIcon}>📦</Text>
-            <Text style={styles.infoText}>
-              {product.stock} portion{product.stock !== 1 ? 's' : ''} left
+          {/* Description */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Description</Text>
+            <Text style={styles.description}>
+              {product.long_description || product.short_description || 'A delicious surplus item at a great price.'}
             </Text>
           </View>
 
-          <View style={styles.priceSection}>
-            <View>
-              <Text style={styles.salePrice}>${salePrice}</Text>
-              <Text style={styles.originalPrice}>Was ${originalPrice}</Text>
-            </View>
-            <View style={styles.savingsBadge}>
-              <Text style={styles.savingsText}>
-                Save ${((product.original_price_cents - product.discounted_price_cents) / 100).toFixed(2)}
-              </Text>
+          {/* Stock */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Availability</Text>
+            <View style={styles.allergenTag}>
+              <Text style={styles.allergenText}>{product.stock} portion{product.stock !== 1 ? 's' : ''} left</Text>
             </View>
           </View>
 
-          <View style={styles.ecoMessage}>
-            <Text style={styles.ecoEmoji}>🌱</Text>
-            <Text style={styles.ecoText}>
-              By ordering, you rescue {quantity} meal{quantity !== 1 ? 's' : ''} and reduce food waste!
-            </Text>
-          </View>
-
-          <View style={styles.quantitySection}>
-            <Text style={styles.quantityLabel}>Quantity</Text>
-            <View style={styles.quantityRow}>
-              <TouchableOpacity
-                style={[styles.qtyButton, quantity <= 1 && styles.qtyButtonDisabled]}
-                onPress={() => setQuantity((q) => Math.max(1, q - 1))}
-                disabled={quantity <= 1}>
-                <Text style={styles.qtyButtonText}>−</Text>
-              </TouchableOpacity>
-              <Text style={styles.qtyValue}>{quantity}</Text>
-              <TouchableOpacity
-                style={[styles.qtyButton, quantity >= product.stock && styles.qtyButtonDisabled]}
-                onPress={() => setQuantity((q) => Math.min(product.stock, q + 1))}
-                disabled={quantity >= product.stock}>
-                <Text style={styles.qtyButtonText}>+</Text>
-              </TouchableOpacity>
-            </View>
+          {/* Impact */}
+          <View style={styles.impactCard}>
+            <Text style={styles.impactLabel}>🌍 Environmental Impact</Text>
+            <Text style={styles.impactNumber}>Save ~0.8kg CO₂</Text>
+            <Text style={styles.impactDescription}>Every meal rescued reduces food waste</Text>
           </View>
         </View>
       </ScrollView>
 
-      <View style={styles.stickyFooter}>
-        <View style={styles.totalRow}>
-          <Text style={styles.totalLabel}>Total</Text>
-          <Text style={styles.totalValue}>${totalPrice}</Text>
+      {/* Bottom Bar */}
+      <View style={styles.bottomBar}>
+        <View>
+          <View style={styles.priceRow}>
+            <Text style={styles.price}>${salePrice}</Text>
+            <Text style={styles.originalPrice}>${originalPrice}</Text>
+          </View>
         </View>
-        <TouchableOpacity
-          style={[styles.addButton, addingToCart && styles.addButtonDisabled]}
-          onPress={handleAddToCart}
-          disabled={addingToCart}
-          activeOpacity={0.85}>
-          {addingToCart ? (
-            <ActivityIndicator color={Colors.dark} />
-          ) : (
-            <Text style={styles.addButtonText}>ADD TO CART</Text>
-          )}
-        </TouchableOpacity>
+
+        <View style={styles.actionRow}>
+          <View style={styles.quantityControl}>
+            <TouchableOpacity
+              onPress={() => setQuantity(Math.max(1, quantity - 1))}
+              style={styles.quantityButton}>
+              <Ionicons name="remove" size={16} color={Colors.white} />
+            </TouchableOpacity>
+            <Text style={styles.quantityText}>{quantity}</Text>
+            <TouchableOpacity
+              onPress={() => setQuantity(Math.min(product.stock, quantity + 1))}
+              style={styles.quantityButton}
+              disabled={quantity >= product.stock}>
+              <Ionicons name="add" size={16} color={Colors.white} />
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            style={[styles.addButton, addingToCart && styles.addButtonDisabled]}
+            onPress={handleAddToCart}
+            disabled={addingToCart}
+            activeOpacity={0.85}>
+            {addingToCart ? (
+              <ActivityIndicator color={Colors.black} />
+            ) : (
+              <Text style={styles.addButtonText}>Add to Cart</Text>
+            )}
+          </TouchableOpacity>
+        </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -219,136 +229,174 @@ function formatPickup(start: string, end: string | null): string {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.dark },
-  scroll: { paddingBottom: 120 },
-  imageContainer: { width, height: width * 0.75, position: 'relative', backgroundColor: '#111111' },
+  container: { flex: 1, backgroundColor: Colors.black },
+  scrollView: { flex: 1 },
+  scrollContent: { paddingBottom: 120 },
+  imageContainer: { height: 320, position: 'relative' },
   image: { width: '100%', height: '100%' },
   imagePlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#111111' },
   imagePlaceholderEmoji: { fontSize: 72 },
-  backButton: {
+  headerButtons: {
     position: 'absolute',
     top: 16,
     left: 16,
+    right: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  headerButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.55)',
+    backgroundColor: Colors.black70,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
   },
-  backButtonText: { fontSize: 20, color: Colors.white, fontWeight: '700' },
-  discountChip: {
+  discountBadge: {
     position: 'absolute',
     bottom: 16,
     right: 16,
     backgroundColor: Colors.orange,
-    borderRadius: BorderRadius.full,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 9999,
   },
-  discountChipText: { fontSize: FontSize.md, fontWeight: '800', color: Colors.white },
-  contentCard: {
-    backgroundColor: Colors.dark,
-    borderTopLeftRadius: 28,
-    borderTopRightRadius: 28,
-    marginTop: -24,
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.lg,
-    paddingBottom: Spacing.xl,
-    gap: Spacing.sm,
-  },
-  badgesRow: { flexDirection: 'row', gap: Spacing.xs, flexWrap: 'wrap' },
-  productName: { fontSize: FontSize.xxl, fontWeight: '800', color: Colors.white },
-  businessName: { fontSize: FontSize.md, color: Colors.muted, fontWeight: '500' },
-  description: { fontSize: FontSize.md, color: 'rgba(255,255,255,0.7)', lineHeight: 22, marginTop: Spacing.xs },
-  infoRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
-  infoIcon: { fontSize: 16 },
-  infoText: { fontSize: FontSize.md, color: 'rgba(255,255,255,0.7)', fontWeight: '500' },
-  priceSection: {
+  discountText: { color: Colors.white, fontSize: 22, fontWeight: '900' },
+  content: { paddingHorizontal: 20, paddingTop: 20 },
+  titleSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: Spacing.sm,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: Colors.border,
-    marginVertical: Spacing.sm,
-  },
-  salePrice: { fontSize: FontSize.xxl + 4, fontWeight: '900', color: Colors.lime },
-  originalPrice: { fontSize: FontSize.sm, color: Colors.muted, textDecorationLine: 'line-through' },
-  savingsBadge: {
-    backgroundColor: 'rgba(217,224,33,0.15)',
-    borderRadius: BorderRadius.md,
-    padding: Spacing.sm,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(217,224,33,0.3)',
-  },
-  savingsText: { fontSize: FontSize.sm, fontWeight: '800', color: Colors.lime },
-  ecoMessage: {
-    flexDirection: 'row',
-    backgroundColor: 'rgba(0,73,44,0.3)',
-    borderRadius: BorderRadius.md,
-    padding: Spacing.md,
-    gap: Spacing.sm,
     alignItems: 'flex-start',
-    borderWidth: 1,
-    borderColor: 'rgba(0,73,44,0.5)',
+    marginBottom: 16,
   },
-  ecoEmoji: { fontSize: 20 },
-  ecoText: { flex: 1, fontSize: FontSize.sm, color: Colors.lime, fontWeight: '600', lineHeight: 20 },
-  quantitySection: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  quantityLabel: { fontSize: FontSize.lg, fontWeight: '700', color: Colors.white },
-  quantityRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
-  qtyButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: Colors.border,
-  },
-  qtyButtonDisabled: { opacity: 0.3 },
-  qtyButtonText: { fontSize: 22, color: Colors.white, fontWeight: '700', lineHeight: 26 },
-  qtyValue: {
-    fontSize: FontSize.xl,
-    fontWeight: '800',
+  titleContainer: { flex: 1, paddingRight: 12 },
+  title: {
     color: Colors.white,
-    minWidth: 24,
-    textAlign: 'center',
+    fontSize: 30,
+    fontWeight: '900',
+    lineHeight: 36,
+    letterSpacing: -0.5,
+    marginBottom: 4,
   },
-  stickyFooter: {
+  restaurant: { color: Colors.w70, fontSize: 16, fontWeight: '600' },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: Colors.lime,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 9999,
+  },
+  ratingText: { color: Colors.black, fontSize: 15, fontWeight: '900' },
+  infoPills: { flexDirection: 'row', gap: 10, marginBottom: 24 },
+  infoPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: Colors.w10,
+    borderWidth: 1,
+    borderColor: Colors.w10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 9999,
+  },
+  infoPillText: { color: Colors.white, fontSize: 14, fontWeight: '600' },
+  section: { marginBottom: 24 },
+  sectionTitle: {
+    color: Colors.white,
+    fontSize: 18,
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+    marginBottom: 10,
+  },
+  description: { color: Colors.w70, fontSize: 15, lineHeight: 24 },
+  allergenTag: {
+    backgroundColor: Colors.w10,
+    borderWidth: 1,
+    borderColor: Colors.w20,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 9999,
+    alignSelf: 'flex-start',
+  },
+  allergenText: { color: Colors.white, fontSize: 14, fontWeight: '600' },
+  impactCard: {
+    backgroundColor: Colors.deepGreen,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: Colors.lime20,
+  },
+  impactLabel: {
+    color: Colors.lime,
+    fontSize: 14,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginBottom: 4,
+  },
+  impactNumber: { color: Colors.white, fontSize: 24, fontWeight: '900' },
+  impactDescription: { color: Colors.w80, fontSize: 14, fontWeight: '600' },
+  bottomBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: Colors.darkCard,
-    padding: Spacing.lg,
-    paddingBottom: Spacing.xl,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: Colors.black,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    gap: Spacing.sm,
+    borderTopColor: Colors.w10,
+    paddingHorizontal: 20,
+    paddingVertical: 20,
   },
-  totalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  totalLabel: { fontSize: FontSize.md, color: Colors.muted, fontWeight: '600' },
-  totalValue: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.lime },
-  addButton: {
-    backgroundColor: Colors.lime,
-    borderRadius: BorderRadius.lg,
-    paddingVertical: Spacing.md + 2,
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 8,
+    marginBottom: 4,
+  },
+  price: { color: Colors.lime, fontSize: 32, fontWeight: '900' },
+  originalPrice: {
+    color: Colors.w30,
+    fontSize: 16,
+    textDecorationLine: 'line-through',
+  },
+  actionRow: { flexDirection: 'row', alignItems: 'center', gap: 12 },
+  quantityControl: {
+    flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: Colors.lime,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 4,
+    gap: 8,
+    backgroundColor: Colors.w10,
+    borderWidth: 1,
+    borderColor: Colors.w20,
+    borderRadius: 14,
+    padding: 4,
+  },
+  quantityButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: Colors.w10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quantityText: {
+    width: 28,
+    textAlign: 'center',
+    color: Colors.white,
+    fontSize: 18,
+    fontWeight: '900',
+  },
+  addButton: {
+    flex: 1,
+    height: 48,
+    backgroundColor: Colors.lime,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   addButtonDisabled: { opacity: 0.7 },
-  addButtonText: { fontSize: FontSize.md, fontWeight: '800', color: Colors.dark, letterSpacing: 0.5 },
+  addButtonText: { color: Colors.black, fontSize: 16, fontWeight: '700' },
 });
