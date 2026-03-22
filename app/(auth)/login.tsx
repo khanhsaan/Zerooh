@@ -21,10 +21,9 @@ import useAuth from '../../hooks/useAuth';
 /**
  * LoginScreen
  *
- * Customer sign-in screen. Accepts email and password, calls
- * `useAuth.signInHandle`. On success, AuthContext session change
+ * Customer sign-in screen. Dark theme (#1a1a1a). Accepts email and password,
+ * calls `useAuth.signInHandle`. On success, AuthContext session change
  * automatically redirects via the root index. On failure, shows an Alert.
- * Navigates back to splash or forward to sign-up via Expo Router.
  */
 export default function LoginScreen() {
   const router = useRouter();
@@ -49,7 +48,7 @@ export default function LoginScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.cream} />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.dark} />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -68,7 +67,7 @@ export default function LoginScreen() {
             <TextInput
               style={styles.input}
               placeholder="you@example.com"
-              placeholderTextColor={Colors.muted}
+              placeholderTextColor="rgba(255,255,255,0.3)"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -81,7 +80,7 @@ export default function LoginScreen() {
               <TextInput
                 style={styles.inputInner}
                 placeholder="••••••••"
-                placeholderTextColor={Colors.muted}
+                placeholderTextColor="rgba(255,255,255,0.3)"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
@@ -93,7 +92,7 @@ export default function LoginScreen() {
                 <Ionicons
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={20}
-                  color={Colors.muted}
+                  color="rgba(255,255,255,0.4)"
                 />
               </TouchableOpacity>
             </View>
@@ -104,9 +103,9 @@ export default function LoginScreen() {
               disabled={loading}
               activeOpacity={0.85}>
               {loading ? (
-                <ActivityIndicator color={Colors.white} />
+                <ActivityIndicator color={Colors.dark} />
               ) : (
-                <Text style={styles.loginButtonText}>Sign In</Text>
+                <Text style={styles.loginButtonText}>SIGN IN</Text>
               )}
             </TouchableOpacity>
 
@@ -131,29 +130,29 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.cream },
+  container: { flex: 1, backgroundColor: Colors.dark },
   scroll: { flexGrow: 1, paddingHorizontal: Spacing.lg, paddingTop: Spacing.md },
   back: { marginBottom: Spacing.lg },
-  backText: { fontSize: FontSize.md, color: Colors.primary, fontWeight: '600' },
+  backText: { fontSize: FontSize.md, color: Colors.lime, fontWeight: '600' },
   header: { marginBottom: Spacing.xl },
-  title: { fontSize: FontSize.xxl, fontWeight: '800', color: Colors.charcoal, marginBottom: Spacing.xs },
+  title: { fontSize: FontSize.xxl, fontWeight: '800', color: Colors.white, marginBottom: Spacing.xs },
   subtitle: { fontSize: FontSize.md, color: Colors.muted, lineHeight: 22 },
   form: { gap: Spacing.sm },
-  label: { fontSize: FontSize.sm, fontWeight: '600', color: Colors.charcoal, marginBottom: 2, marginTop: Spacing.xs },
+  label: { fontSize: FontSize.sm, fontWeight: '600', color: Colors.white, marginBottom: 2, marginTop: Spacing.xs },
   input: {
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.darkCard,
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     fontSize: FontSize.md,
-    color: Colors.charcoal,
+    color: Colors.white,
     borderWidth: 1.5,
     borderColor: Colors.border,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.darkCard,
     borderRadius: BorderRadius.md,
     borderWidth: 1.5,
     borderColor: Colors.border,
@@ -163,30 +162,30 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     fontSize: FontSize.md,
-    color: Colors.charcoal,
+    color: Colors.white,
   },
   eyeButton: {
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
   },
   loginButton: {
-    backgroundColor: Colors.orange,
+    backgroundColor: Colors.lime,
     borderRadius: BorderRadius.lg,
     paddingVertical: Spacing.md + 2,
     alignItems: 'center',
     marginTop: Spacing.md,
-    shadowColor: Colors.orange,
+    shadowColor: Colors.lime,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 4,
   },
   loginButtonDisabled: { opacity: 0.7 },
-  loginButtonText: { fontSize: FontSize.lg, fontWeight: '700', color: Colors.white },
+  loginButtonText: { fontSize: FontSize.md, fontWeight: '800', color: Colors.dark, letterSpacing: 0.5 },
   divider: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginVertical: Spacing.sm },
   dividerLine: { flex: 1, height: 1, backgroundColor: Colors.border },
   dividerText: { fontSize: FontSize.sm, color: Colors.muted },
   signupButton: { alignItems: 'center', paddingVertical: Spacing.sm },
-  signupText: { fontSize: FontSize.md, color: Colors.charcoal },
-  signupAccent: { color: Colors.primary, fontWeight: '700' },
+  signupText: { fontSize: FontSize.md, color: Colors.muted },
+  signupAccent: { color: Colors.lime, fontWeight: '700' },
 });

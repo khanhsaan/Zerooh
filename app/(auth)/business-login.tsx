@@ -21,8 +21,8 @@ import useAuth from '../../hooks/useAuth';
 /**
  * BusinessLoginScreen
  *
- * Business partner sign-in screen. Accepts email and password, calls
- * `useAuth.signInHandle`. On success, AuthContext session change
+ * Business partner sign-in screen. Dark theme (#1a1a1a). Accepts email and password,
+ * calls `useAuth.signInHandle`. On success, AuthContext session change
  * automatically redirects via the root index. Navigates to sign-up
  * with isBusiness=true param for new partners.
  */
@@ -48,7 +48,7 @@ export default function BusinessLoginScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.dark} />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -87,7 +87,7 @@ export default function BusinessLoginScreen() {
             <TextInput
               style={styles.input}
               placeholder="business@example.com"
-              placeholderTextColor={Colors.muted}
+              placeholderTextColor="rgba(255,255,255,0.3)"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -99,7 +99,7 @@ export default function BusinessLoginScreen() {
               <TextInput
                 style={styles.inputInner}
                 placeholder="••••••••"
-                placeholderTextColor={Colors.muted}
+                placeholderTextColor="rgba(255,255,255,0.3)"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
@@ -111,7 +111,7 @@ export default function BusinessLoginScreen() {
                 <Ionicons
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={20}
-                  color={Colors.muted}
+                  color="rgba(255,255,255,0.4)"
                 />
               </TouchableOpacity>
             </View>
@@ -122,9 +122,9 @@ export default function BusinessLoginScreen() {
               disabled={loading}
               activeOpacity={0.85}>
               {loading ? (
-                <ActivityIndicator color={Colors.white} />
+                <ActivityIndicator color={Colors.dark} />
               ) : (
-                <Text style={styles.loginButtonText}>Sign In</Text>
+                <Text style={styles.loginButtonText}>SIGN IN</Text>
               )}
             </TouchableOpacity>
 
@@ -143,10 +143,10 @@ export default function BusinessLoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.primary },
+  container: { flex: 1, backgroundColor: Colors.dark },
   scroll: { flexGrow: 1 },
   topBar: { paddingHorizontal: Spacing.lg, paddingTop: Spacing.md, paddingBottom: Spacing.sm },
-  backText: { fontSize: FontSize.md, color: 'rgba(255,255,255,0.7)', fontWeight: '600' },
+  backText: { fontSize: FontSize.md, color: Colors.lime, fontWeight: '600' },
   header: { paddingHorizontal: Spacing.lg, paddingBottom: Spacing.xl },
   businessBadge: {
     backgroundColor: Colors.lime,
@@ -156,9 +156,9 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     marginBottom: Spacing.md,
   },
-  businessBadgeText: { fontSize: FontSize.sm, fontWeight: '700', color: Colors.charcoal },
+  businessBadgeText: { fontSize: FontSize.sm, fontWeight: '700', color: Colors.dark },
   title: { fontSize: FontSize.xxl + 4, fontWeight: '900', color: Colors.white, marginBottom: Spacing.xs },
-  subtitle: { fontSize: FontSize.md, color: 'rgba(255,255,255,0.7)', lineHeight: 22 },
+  subtitle: { fontSize: FontSize.md, color: Colors.muted, lineHeight: 22 },
   statsBar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
@@ -168,9 +168,9 @@ const styles = StyleSheet.create({
   },
   statItem: { alignItems: 'center' },
   statValue: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.lime },
-  statLabel: { fontSize: FontSize.xs, color: 'rgba(255,255,255,0.6)', marginTop: 2 },
+  statLabel: { fontSize: FontSize.xs, color: Colors.muted, marginTop: 2 },
   formCard: {
-    backgroundColor: Colors.cream,
+    backgroundColor: Colors.darkCard,
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     paddingHorizontal: Spacing.lg,
@@ -178,22 +178,24 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.xxl,
     flex: 1,
     gap: Spacing.xs,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
   },
-  label: { fontSize: FontSize.sm, fontWeight: '600', color: Colors.charcoal, marginBottom: 2, marginTop: Spacing.sm },
+  label: { fontSize: FontSize.sm, fontWeight: '600', color: Colors.white, marginBottom: 2, marginTop: Spacing.sm },
   input: {
-    backgroundColor: Colors.white,
+    backgroundColor: '#333333',
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     fontSize: FontSize.md,
-    color: Colors.charcoal,
+    color: Colors.white,
     borderWidth: 1.5,
     borderColor: Colors.border,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: '#333333',
     borderRadius: BorderRadius.md,
     borderWidth: 1.5,
     borderColor: Colors.border,
@@ -203,27 +205,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     fontSize: FontSize.md,
-    color: Colors.charcoal,
+    color: Colors.white,
   },
   eyeButton: {
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
   },
   loginButton: {
-    backgroundColor: Colors.primary,
+    backgroundColor: Colors.lime,
     borderRadius: BorderRadius.lg,
     paddingVertical: Spacing.md + 2,
     alignItems: 'center',
     marginTop: Spacing.md,
-    shadowColor: Colors.primary,
+    shadowColor: Colors.lime,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 4,
   },
   loginButtonDisabled: { opacity: 0.7 },
-  loginButtonText: { fontSize: FontSize.lg, fontWeight: '700', color: Colors.white },
+  loginButtonText: { fontSize: FontSize.md, fontWeight: '800', color: Colors.dark, letterSpacing: 0.5 },
   signupButton: { alignItems: 'center', paddingVertical: Spacing.sm },
-  signupText: { fontSize: FontSize.md, color: Colors.charcoal },
-  signupAccent: { color: Colors.primary, fontWeight: '700' },
+  signupText: { fontSize: FontSize.md, color: Colors.muted },
+  signupAccent: { color: Colors.lime, fontWeight: '700' },
 });

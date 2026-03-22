@@ -1,14 +1,17 @@
 export const Colors = {
-  primary: '#00492C',      // Deep Green — headers, nav bar, structural UI
-  cream: '#EAEBC4',        // Soft Cream — main background
-  lime: '#D9E021',         // Lime Green — badges, savings, active tab
-  orange: '#EF8E00',       // Orange — CTA buttons, primary actions
-  white: '#FFFFFF',        // Card backgrounds, text on dark
-  charcoal: '#2F2F2F',     // Text, borders
+  primary: '#00492C',              // Deep Green — eco sections, impact cards
+  cream: '#EAEBC4',                // Soft Cream — legacy (unused in dark theme)
+  lime: '#D9E021',                 // Lime Green — CTA buttons, active tab, prices
+  orange: '#FF6B35',               // Bright Orange — discount badges, accents
+  white: '#FFFFFF',                // Text on dark, overlays
+  charcoal: '#2F2F2F',             // Legacy (unused in dark theme)
   error: '#D4183D',
-  muted: '#888888',
+  muted: 'rgba(255,255,255,0.5)', // Muted text on dark backgrounds
   lightGray: '#F5F5F5',
-  border: '#E0E0E0',
+  border: 'rgba(255,255,255,0.1)', // Subtle borders on dark
+  dark: '#1a1a1a',                 // Main background
+  darkCard: '#2a2a2a',             // Card/surface background
+  darkBorder: 'rgba(255,255,255,0.08)', // Even subtler card border
 };
 
 export const Spacing = {

@@ -11,7 +11,6 @@ import {
   TextInput,
   TouchableOpacity,
   Alert,
-  Dimensions,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Colors, Spacing, BorderRadius, FontSize } from '../../constants/Colors';
@@ -38,9 +37,9 @@ const CATEGORIES = [
 /**
  * HomeScreen
  *
- * Main customer feed. Displays:
+ * Main customer feed. Dark theme (#1a1a1a bg, #2a2a2a cards). Displays:
  * - Personalised greeting with first name from Supabase
- * - Location + search bar
+ * - Location + search bar (dark glass style)
  * - Eco-impact banner (CO₂ saved, meals rescued)
  * - Category filter pills
  * - 2-column product card grid, filtered by selected category
@@ -131,7 +130,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.cream} />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.dark} />
 
       <FlatList
         data={filtered}
@@ -143,8 +142,8 @@ export default function HomeScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={Colors.primary}
-            colors={[Colors.primary]}
+            tintColor={Colors.lime}
+            colors={[Colors.lime]}
           />
         }
         ListHeaderComponent={
@@ -169,7 +168,7 @@ export default function HomeScreen() {
               <TextInput
                 style={styles.searchInput}
                 placeholder="Restaurant, bakery, or dish…"
-                placeholderTextColor={Colors.muted}
+                placeholderTextColor="rgba(255,255,255,0.3)"
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 returnKeyType="search"
@@ -178,19 +177,16 @@ export default function HomeScreen() {
 
             <View style={styles.impactBanner}>
               <View style={styles.impactItem}>
-                <Text style={styles.impactEmoji}>🌿</Text>
                 <Text style={styles.impactValue}>2.4M+</Text>
                 <Text style={styles.impactLabel}>Meals rescued</Text>
               </View>
               <View style={styles.impactDivider} />
               <View style={styles.impactItem}>
-                <Text style={styles.impactEmoji}>💨</Text>
                 <Text style={styles.impactValue}>480t</Text>
                 <Text style={styles.impactLabel}>CO₂ saved</Text>
               </View>
               <View style={styles.impactDivider} />
               <View style={styles.impactItem}>
-                <Text style={styles.impactEmoji}>🏪</Text>
                 <Text style={styles.impactValue}>1,200+</Text>
                 <Text style={styles.impactLabel}>Partners</Text>
               </View>
@@ -250,7 +246,7 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.cream },
+  container: { flex: 1, backgroundColor: Colors.dark },
   listContent: { paddingBottom: Spacing.xl },
   columnWrapper: {
     paddingHorizontal: Spacing.lg,
@@ -265,7 +261,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.md,
     paddingBottom: Spacing.sm,
   },
-  greeting: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.charcoal, marginBottom: 2 },
+  greeting: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.white, marginBottom: 2 },
   locationRow: { flexDirection: 'row', alignItems: 'center', gap: 3 },
   locationPin: { fontSize: 13 },
   location: { fontSize: FontSize.sm, color: Colors.muted, fontWeight: '500' },
@@ -277,27 +273,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  avatarText: { fontSize: FontSize.lg, fontWeight: '800', color: Colors.charcoal },
+  avatarText: { fontSize: FontSize.lg, fontWeight: '800', color: Colors.dark },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: 'rgba(255,255,255,0.08)',
     marginHorizontal: Spacing.lg,
     borderRadius: BorderRadius.lg,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm + 2,
     gap: Spacing.sm,
     marginBottom: Spacing.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.07,
-    shadowRadius: 8,
-    elevation: 3,
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: Colors.border,
   },
   searchIcon: { fontSize: 16 },
-  searchInput: { flex: 1, fontSize: FontSize.md, color: Colors.charcoal, padding: 0 },
+  searchInput: { flex: 1, fontSize: FontSize.md, color: Colors.white, padding: 0 },
   impactBanner: {
     flexDirection: 'row',
     backgroundColor: Colors.primary,
@@ -308,7 +299,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   impactItem: { flex: 1, alignItems: 'center', gap: 2 },
-  impactEmoji: { fontSize: 18 },
   impactValue: { fontSize: FontSize.md, fontWeight: '800', color: Colors.lime },
   impactLabel: { fontSize: FontSize.xs - 1, color: 'rgba(255,255,255,0.65)', textAlign: 'center' },
   impactDivider: { width: 1, height: 36, backgroundColor: 'rgba(255,255,255,0.15)' },
@@ -320,10 +310,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     marginBottom: Spacing.sm,
   },
-  sectionTitle: { fontSize: FontSize.lg, fontWeight: '800', color: Colors.charcoal },
+  sectionTitle: { fontSize: FontSize.lg, fontWeight: '800', color: Colors.white },
   sectionCount: { fontSize: FontSize.sm, color: Colors.muted, fontWeight: '500' },
   emptyState: { alignItems: 'center', paddingVertical: Spacing.xxl },
   emptyEmoji: { fontSize: 48, marginBottom: Spacing.md },
-  emptyTitle: { fontSize: FontSize.xl, fontWeight: '700', color: Colors.charcoal, marginBottom: Spacing.xs },
+  emptyTitle: { fontSize: FontSize.xl, fontWeight: '700', color: Colors.white, marginBottom: Spacing.xs },
   emptySubtitle: { fontSize: FontSize.md, color: Colors.muted, textAlign: 'center' },
 });

@@ -16,19 +16,19 @@ const SERVICE_FEE_CENTS = 49; // $0.49
 /**
  * CartScreen
  *
- * Displays the user's current cart items with:
+ * Dark theme (#1a1a1a bg, #2a2a2a cards). Displays the user's current cart items with:
  * - Thumbnail, name, business, discounted price × quantity per item
  * - Remove item button (trashcan)
- * - Price breakdown: subtotal, savings, service fee, total
- * - Savings summary line ("You saved $X and helped reduce food waste!")
- * - Orange "Checkout" CTA — creates orders from cart then clears cart
+ * - Price breakdown: subtotal, savings (orange), service fee, total (lime)
+ * - Savings summary line
+ * - Lime "Checkout" CTA — creates orders from cart then clears cart
  *
  * Uses `useAsyncWithTimeout` for loading cart, `useCarts` for CRUD,
  * and `useOrders.createOrder` to convert cart items to orders.
  */
 const CartScreen: React.FC = () => {
   const [checkingOut, setCheckingOut] = useState(false);
-  const [cartVersion, setCartVersion] = useState(0); // bump to re-fetch
+  const [cartVersion, setCartVersion] = useState(0);
 
   const cartsHook = useCarts();
   const ordersHook = useOrders();
@@ -101,7 +101,7 @@ const CartScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.cream} />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.dark} />
 
       <View style={styles.header}>
         <Text style={styles.title}>My Cart 🛒</Text>
@@ -158,7 +158,7 @@ const CartScreen: React.FC = () => {
               <Text style={styles.summaryLabel}>Subtotal</Text>
               <Text style={styles.summaryValue}>{fmt(subtotalCents)}</Text>
             </View>
-            <View style={[styles.summaryRow, styles.savingsRow]}>
+            <View style={styles.summaryRow}>
               <Text style={styles.savingsLabel}>💚 Savings</Text>
               <Text style={styles.savingsValue}>−{fmt(savingsCents)}</Text>
             </View>
@@ -172,7 +172,6 @@ const CartScreen: React.FC = () => {
               <Text style={styles.totalValue}>{fmt(totalCents)}</Text>
             </View>
 
-            {/* Savings message */}
             {savingsCents > 0 && (
               <View style={styles.ecoMessage}>
                 <Text style={styles.ecoText}>
@@ -181,16 +180,15 @@ const CartScreen: React.FC = () => {
               </View>
             )}
 
-            {/* Checkout button */}
             <TouchableOpacity
               style={[styles.checkoutButton, checkingOut && styles.disabled]}
               onPress={handleCheckout}
               disabled={checkingOut}
               activeOpacity={0.85}>
               {checkingOut ? (
-                <ActivityIndicator color={Colors.white} />
+                <ActivityIndicator color={Colors.dark} />
               ) : (
-                <Text style={styles.checkoutButtonText}>Checkout — {fmt(totalCents)}</Text>
+                <Text style={styles.checkoutButtonText}>CHECKOUT — {fmt(totalCents)}</Text>
               )}
             </TouchableOpacity>
           </View>
@@ -201,76 +199,69 @@ const CartScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.cream },
+  container: { flex: 1, backgroundColor: Colors.dark },
   header: { paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.sm },
-  title: { fontSize: FontSize.xxl, fontWeight: '800', color: Colors.charcoal },
+  title: { fontSize: FontSize.xxl, fontWeight: '800', color: Colors.white },
   subtitle: { fontSize: FontSize.sm, color: Colors.muted, marginTop: 2 },
   emptyState: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.sm },
   emptyEmoji: { fontSize: 56 },
-  emptyTitle: { fontSize: FontSize.xl, fontWeight: '700', color: Colors.charcoal },
+  emptyTitle: { fontSize: FontSize.xl, fontWeight: '700', color: Colors.white },
   emptySubtitle: { fontSize: FontSize.md, color: Colors.muted },
   list: { paddingHorizontal: Spacing.lg, gap: Spacing.sm, paddingBottom: Spacing.sm },
   cartItem: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.darkCard,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     alignItems: 'center',
     gap: Spacing.sm,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: Colors.darkBorder,
   },
   cartImageContainer: { width: 64, height: 64, borderRadius: BorderRadius.md, overflow: 'hidden' },
   cartImage: { width: '100%', height: '100%' },
-  cartImagePlaceholder: { flex: 1, backgroundColor: '#F0F0E8', alignItems: 'center', justifyContent: 'center' },
+  cartImagePlaceholder: { flex: 1, backgroundColor: '#222222', alignItems: 'center', justifyContent: 'center' },
   cartImageEmoji: { fontSize: 28 },
   cartItemDetails: { flex: 1 },
-  cartItemName: { fontSize: FontSize.md, fontWeight: '700', color: Colors.charcoal },
+  cartItemName: { fontSize: FontSize.md, fontWeight: '700', color: Colors.white },
   cartItemBusiness: { fontSize: FontSize.xs, color: Colors.muted },
   cartItemQty: { fontSize: FontSize.xs, color: Colors.muted, marginTop: 2 },
   cartItemRight: { alignItems: 'flex-end', gap: Spacing.xs },
-  cartItemPrice: { fontSize: FontSize.md, fontWeight: '800', color: Colors.primary },
+  cartItemPrice: { fontSize: FontSize.md, fontWeight: '800', color: Colors.lime },
   removeButton: { padding: 4 },
   removeButtonText: { fontSize: 16 },
   summaryCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.darkCard,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: Spacing.lg,
     paddingBottom: Spacing.xl,
     gap: Spacing.sm,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 8,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
   },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   summaryLabel: { fontSize: FontSize.md, color: Colors.muted, fontWeight: '500' },
-  summaryValue: { fontSize: FontSize.md, color: Colors.charcoal, fontWeight: '600' },
-  savingsRow: {},
-  savingsLabel: { fontSize: FontSize.md, color: '#2D7D4E', fontWeight: '600' },
-  savingsValue: { fontSize: FontSize.md, color: '#2D7D4E', fontWeight: '700' },
+  summaryValue: { fontSize: FontSize.md, color: Colors.white, fontWeight: '600' },
+  savingsLabel: { fontSize: FontSize.md, color: Colors.orange, fontWeight: '600' },
+  savingsValue: { fontSize: FontSize.md, color: Colors.orange, fontWeight: '700' },
   divider: { height: 1, backgroundColor: Colors.border, marginVertical: 4 },
-  totalLabel: { fontSize: FontSize.lg, fontWeight: '800', color: Colors.charcoal },
-  totalValue: { fontSize: FontSize.xl, fontWeight: '900', color: Colors.charcoal },
+  totalLabel: { fontSize: FontSize.lg, fontWeight: '800', color: Colors.white },
+  totalValue: { fontSize: FontSize.xl, fontWeight: '900', color: Colors.lime },
   ecoMessage: {
-    backgroundColor: '#F0FAF4',
+    backgroundColor: 'rgba(0,73,44,0.3)',
     borderRadius: BorderRadius.md,
     padding: Spacing.sm,
     borderWidth: 1,
-    borderColor: '#C8EDD5',
+    borderColor: 'rgba(0,73,44,0.5)',
   },
-  ecoText: { fontSize: FontSize.sm, color: Colors.primary, fontWeight: '600', lineHeight: 20 },
+  ecoText: { fontSize: FontSize.sm, color: Colors.lime, fontWeight: '600', lineHeight: 20 },
   checkoutButton: {
-    backgroundColor: Colors.orange,
+    backgroundColor: Colors.lime,
     borderRadius: BorderRadius.lg,
     paddingVertical: Spacing.md + 2,
     alignItems: 'center',
-    shadowColor: Colors.orange,
+    shadowColor: Colors.lime,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
@@ -278,7 +269,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.xs,
   },
   disabled: { opacity: 0.7 },
-  checkoutButtonText: { fontSize: FontSize.lg, fontWeight: '700', color: Colors.white },
+  checkoutButtonText: { fontSize: FontSize.md, fontWeight: '800', color: Colors.dark, letterSpacing: 0.5 },
 });
 
 export default CartScreen;

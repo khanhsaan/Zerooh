@@ -22,33 +22,32 @@ const FOOD_PREVIEW = [
 /**
  * SplashScreen
  *
- * Welcome / landing screen shown to unauthenticated users. Displays the
- * Zeroooh! brand, hero copy, a row of food preview cards, and two role CTAs:
- * - Customer → /(auth)/login
- * - Business Partner → /(auth)/business-login
+ * Welcome / landing screen shown to unauthenticated users. Dark theme (#1a1a1a).
+ * Displays massive stacked hero typography: RESCUE / FOOD. / SAVE BIG.
+ * A row of food preview cards, lime CTA for customers, white-outlined CTA for business.
  */
 export default function SplashScreen() {
   const router = useRouter();
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.cream} />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.dark} />
 
       <View style={styles.topSection}>
-        <View style={styles.logoContainer}>
+        {/* Brand badge */}
+        <View style={styles.brandRow}>
           <View style={styles.logoBadge}>
             <Text style={styles.logoEmoji}>🌿</Text>
           </View>
           <Text style={styles.logoText}>Zeroooh!</Text>
         </View>
 
+        {/* Hero typography */}
         <View style={styles.heroContainer}>
-          <Text style={styles.heroTitle}>
-            Rescue Food.{'\n'}
-            <Text style={styles.heroAccent}>Save Big.</Text>
-          </Text>
-          <Text style={styles.tagline}>
-            Great food at half the price — and zero waste.
+          <Text style={styles.heroLine}>RESCUE</Text>
+          <Text style={[styles.heroLine, styles.heroLime]}>FOOD.</Text>
+          <Text style={styles.heroTagline}>
+            Great deals at half the price —{'\n'}and zero waste.
           </Text>
         </View>
 
@@ -58,6 +57,7 @@ export default function SplashScreen() {
         </View>
       </View>
 
+      {/* Food preview cards */}
       <View style={styles.illustrationArea}>
         <View style={styles.foodCardRow}>
           {FOOD_PREVIEW.map((item, i) => (
@@ -72,12 +72,13 @@ export default function SplashScreen() {
         </View>
       </View>
 
+      {/* CTA buttons */}
       <View style={styles.ctaContainer}>
         <TouchableOpacity
           style={styles.primaryButton}
           onPress={() => router.push('/(auth)/login')}
           activeOpacity={0.85}>
-          <Text style={styles.primaryButtonText}>Get the App — Customer</Text>
+          <Text style={styles.primaryButtonText}>GET THE APP — CUSTOMER</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -96,67 +97,62 @@ export default function SplashScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.cream },
+  container: { flex: 1, backgroundColor: Colors.dark },
   topSection: {
     flex: 1,
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.xl,
-    alignItems: 'center',
   },
-  logoContainer: {
+  brandRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: Spacing.xl,
     gap: Spacing.sm,
   },
   logoBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 40,
+    height: 40,
+    borderRadius: 10,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  logoEmoji: { fontSize: 22 },
+  logoEmoji: { fontSize: 20 },
   logoText: {
-    fontSize: 28,
+    fontSize: FontSize.xl,
     fontWeight: '800',
-    color: Colors.primary,
+    color: Colors.white,
     letterSpacing: -0.5,
   },
-  heroContainer: { alignItems: 'center', marginBottom: Spacing.lg },
-  heroTitle: {
-    fontSize: 42,
+  heroContainer: { marginBottom: Spacing.lg },
+  heroLine: {
+    fontSize: 58,
     fontWeight: '900',
-    color: Colors.charcoal,
-    textAlign: 'center',
-    lineHeight: 48,
-    letterSpacing: -1,
+    color: Colors.white,
+    letterSpacing: -2,
+    lineHeight: 62,
   },
-  heroAccent: { color: Colors.primary },
-  tagline: {
+  heroLime: { color: Colors.lime },
+  heroTagline: {
     fontSize: FontSize.md,
     color: Colors.muted,
-    textAlign: 'center',
-    marginTop: Spacing.sm,
     lineHeight: 22,
+    marginTop: Spacing.md,
   },
   locationBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.darkCard,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs + 2,
     borderRadius: BorderRadius.full,
     gap: Spacing.xs,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-    elevation: 3,
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   locationDot: { fontSize: 13 },
-  locationText: { fontSize: FontSize.sm, fontWeight: '600', color: Colors.charcoal },
+  locationText: { fontSize: FontSize.sm, fontWeight: '600', color: Colors.white },
   illustrationArea: { paddingHorizontal: Spacing.lg, marginVertical: Spacing.lg },
   foodCardRow: {
     flexDirection: 'row',
@@ -164,27 +160,24 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   foodCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.darkCard,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     alignItems: 'center',
     width: (width - Spacing.lg * 2 - Spacing.sm * 2) / 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   foodCardCenter: {
     transform: [{ translateY: -8 }],
-    borderWidth: 2,
     borderColor: Colors.lime,
+    borderWidth: 2,
   },
-  foodCardEmoji: { fontSize: 30, marginBottom: Spacing.xs },
+  foodCardEmoji: { fontSize: 28, marginBottom: Spacing.xs },
   foodCardName: {
     fontSize: FontSize.xs,
     fontWeight: '600',
-    color: Colors.charcoal,
+    color: Colors.white,
     textAlign: 'center',
     marginBottom: Spacing.xs,
   },
@@ -201,34 +194,34 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   primaryButton: {
-    backgroundColor: Colors.orange,
+    backgroundColor: Colors.lime,
     borderRadius: BorderRadius.lg,
     paddingVertical: Spacing.md + 2,
     alignItems: 'center',
-    shadowColor: Colors.orange,
+    shadowColor: Colors.lime,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.3,
     shadowRadius: 12,
     elevation: 5,
   },
   primaryButtonText: {
-    fontSize: FontSize.lg,
-    fontWeight: '700',
-    color: Colors.white,
-    letterSpacing: 0.2,
+    fontSize: FontSize.md,
+    fontWeight: '800',
+    color: Colors.dark,
+    letterSpacing: 0.5,
   },
   secondaryButton: {
     borderRadius: BorderRadius.lg,
     paddingVertical: Spacing.md + 2,
     alignItems: 'center',
     borderWidth: 2,
-    borderColor: Colors.primary,
+    borderColor: 'rgba(255,255,255,0.3)',
     backgroundColor: 'transparent',
   },
   secondaryButtonText: {
     fontSize: FontSize.lg,
     fontWeight: '700',
-    color: Colors.primary,
+    color: Colors.white,
   },
   footerText: {
     textAlign: 'center',

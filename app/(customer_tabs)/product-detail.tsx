@@ -28,16 +28,16 @@ const { width } = Dimensions.get('window');
 /**
  * ProductDetailScreen
  *
- * Shows full product information for a selected deal:
+ * Dark theme (#1a1a1a). Shows full product information for a selected deal:
  * - Full-width hero image (or emoji placeholder)
- * - Discount badge, eco-pick badge
- * - Business name, product name, short + long description
- * - Original (strikethrough) and discounted price
- * - Pickup time window
- * - Stock availability indicator
- * - Quantity selector (±)
- * - "You rescued N meal(s)" sustainability badge
- * - Sticky "Add to Cart" CTA button
+ * - Orange discount badge bottom-right of image
+ * - Back button (dark glass) top-left
+ * - Product name, business name, description
+ * - Lime discounted price + strikethrough original
+ * - Pickup window, stock indicator
+ * - Quantity selector (dark bg)
+ * - "You rescued N meal(s)" eco message
+ * - Lime "ADD TO CART" sticky CTA
  *
  * Fetches product by ID via `useProducts.getProductById`.
  * `productId` is received as a string search param from Expo Router.
@@ -200,9 +200,9 @@ export default function ProductDetailScreen() {
           disabled={addingToCart}
           activeOpacity={0.85}>
           {addingToCart ? (
-            <ActivityIndicator color={Colors.white} />
+            <ActivityIndicator color={Colors.dark} />
           ) : (
-            <Text style={styles.addButtonText}>Add to Cart</Text>
+            <Text style={styles.addButtonText}>ADD TO CART</Text>
           )}
         </TouchableOpacity>
       </View>
@@ -219,11 +219,11 @@ function formatPickup(start: string, end: string | null): string {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.cream },
+  container: { flex: 1, backgroundColor: Colors.dark },
   scroll: { paddingBottom: 120 },
-  imageContainer: { width, height: width * 0.75, position: 'relative', backgroundColor: '#F0F0E8' },
+  imageContainer: { width, height: width * 0.75, position: 'relative', backgroundColor: '#111111' },
   image: { width: '100%', height: '100%' },
-  imagePlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#F0F0E8' },
+  imagePlaceholder: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#111111' },
   imagePlaceholderEmoji: { fontSize: 72 },
   backButton: {
     position: 'absolute',
@@ -232,23 +232,25 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.45)',
+    backgroundColor: 'rgba(0,0,0,0.55)',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
   },
   backButtonText: { fontSize: 20, color: Colors.white, fontWeight: '700' },
   discountChip: {
     position: 'absolute',
     bottom: 16,
     right: 16,
-    backgroundColor: Colors.lime,
+    backgroundColor: Colors.orange,
     borderRadius: BorderRadius.full,
     paddingHorizontal: 12,
     paddingVertical: 5,
   },
-  discountChipText: { fontSize: FontSize.md, fontWeight: '800', color: Colors.charcoal },
+  discountChipText: { fontSize: FontSize.md, fontWeight: '800', color: Colors.white },
   contentCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.dark,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     marginTop: -24,
@@ -258,12 +260,12 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   badgesRow: { flexDirection: 'row', gap: Spacing.xs, flexWrap: 'wrap' },
-  productName: { fontSize: FontSize.xxl, fontWeight: '800', color: Colors.charcoal },
+  productName: { fontSize: FontSize.xxl, fontWeight: '800', color: Colors.white },
   businessName: { fontSize: FontSize.md, color: Colors.muted, fontWeight: '500' },
-  description: { fontSize: FontSize.md, color: Colors.charcoal, lineHeight: 22, marginTop: Spacing.xs },
+  description: { fontSize: FontSize.md, color: 'rgba(255,255,255,0.7)', lineHeight: 22, marginTop: Spacing.xs },
   infoRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
   infoIcon: { fontSize: 16 },
-  infoText: { fontSize: FontSize.md, color: Colors.charcoal, fontWeight: '500' },
+  infoText: { fontSize: FontSize.md, color: 'rgba(255,255,255,0.7)', fontWeight: '500' },
   priceSection: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -274,44 +276,48 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
     marginVertical: Spacing.sm,
   },
-  salePrice: { fontSize: FontSize.xxl + 4, fontWeight: '900', color: Colors.primary },
+  salePrice: { fontSize: FontSize.xxl + 4, fontWeight: '900', color: Colors.lime },
   originalPrice: { fontSize: FontSize.sm, color: Colors.muted, textDecorationLine: 'line-through' },
   savingsBadge: {
-    backgroundColor: Colors.lime,
+    backgroundColor: 'rgba(217,224,33,0.15)',
     borderRadius: BorderRadius.md,
     padding: Spacing.sm,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(217,224,33,0.3)',
   },
-  savingsText: { fontSize: FontSize.sm, fontWeight: '800', color: Colors.charcoal },
+  savingsText: { fontSize: FontSize.sm, fontWeight: '800', color: Colors.lime },
   ecoMessage: {
     flexDirection: 'row',
-    backgroundColor: '#F0FAF4',
+    backgroundColor: 'rgba(0,73,44,0.3)',
     borderRadius: BorderRadius.md,
     padding: Spacing.md,
     gap: Spacing.sm,
     alignItems: 'flex-start',
     borderWidth: 1,
-    borderColor: '#C8EDD5',
+    borderColor: 'rgba(0,73,44,0.5)',
   },
   ecoEmoji: { fontSize: 20 },
-  ecoText: { flex: 1, fontSize: FontSize.sm, color: Colors.primary, fontWeight: '600', lineHeight: 20 },
+  ecoText: { flex: 1, fontSize: FontSize.sm, color: Colors.lime, fontWeight: '600', lineHeight: 20 },
   quantitySection: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  quantityLabel: { fontSize: FontSize.lg, fontWeight: '700', color: Colors.charcoal },
+  quantityLabel: { fontSize: FontSize.lg, fontWeight: '700', color: Colors.white },
   quantityRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
   qtyButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: Colors.primary,
+    backgroundColor: 'rgba(255,255,255,0.1)',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
-  qtyButtonDisabled: { backgroundColor: Colors.border },
+  qtyButtonDisabled: { opacity: 0.3 },
   qtyButtonText: { fontSize: 22, color: Colors.white, fontWeight: '700', lineHeight: 26 },
   qtyValue: {
     fontSize: FontSize.xl,
     fontWeight: '800',
-    color: Colors.charcoal,
+    color: Colors.white,
     minWidth: 24,
     textAlign: 'center',
   },
@@ -320,32 +326,29 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.darkCard,
     padding: Spacing.lg,
     paddingBottom: Spacing.xl,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 10,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
     gap: Spacing.sm,
   },
   totalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   totalLabel: { fontSize: FontSize.md, color: Colors.muted, fontWeight: '600' },
-  totalValue: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.charcoal },
+  totalValue: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.lime },
   addButton: {
-    backgroundColor: Colors.orange,
+    backgroundColor: Colors.lime,
     borderRadius: BorderRadius.lg,
     paddingVertical: Spacing.md + 2,
     alignItems: 'center',
-    shadowColor: Colors.orange,
+    shadowColor: Colors.lime,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 4,
   },
   addButtonDisabled: { opacity: 0.7 },
-  addButtonText: { fontSize: FontSize.lg, fontWeight: '700', color: Colors.white },
+  addButtonText: { fontSize: FontSize.md, fontWeight: '800', color: Colors.dark, letterSpacing: 0.5 },
 });

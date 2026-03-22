@@ -1,6 +1,6 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
-  View, Text, StyleSheet, SafeAreaView, StatusBar, TouchableOpacity,
+  View, Text, StyleSheet, SafeAreaView, StatusBar,
   FlatList, Image,
 } from 'react-native';
 import { Colors, Spacing, BorderRadius, FontSize } from '../../constants/Colors';
@@ -13,9 +13,9 @@ import { displayError } from '../../utilities/handleError';
 /**
  * MapScreen
  *
- * Explore screen showing nearby food businesses and their available deals.
- * Displays a mock location banner (map integration is a v2 feature — react-native-maps
- * requires native config). Lists participating stores with deal counts and thumbnails.
+ * Dark theme (#1a1a1a bg). Explore screen showing nearby food businesses and
+ * their available deals. Displays a mock location banner (map integration is
+ * a v2 feature). Lists participating stores with deal counts and thumbnails.
  *
  * Uses `useProducts` grouped by business to build the store list.
  * Uses `useAsyncWithTimeout` for loading state management.
@@ -53,7 +53,7 @@ const MapScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.cream} />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.dark} />
 
       {/* Map placeholder */}
       <View style={styles.mapArea}>
@@ -68,7 +68,9 @@ const MapScreen: React.FC = () => {
           {stores.slice(0, 4).map((store, i) => (
             <View key={i} style={[styles.pin, i % 2 === 0 ? styles.pinGreen : styles.pinLime]}>
               <Text style={styles.pinText}>🏪</Text>
-              <Text style={styles.pinLabel} numberOfLines={1}>{store.business.business_name}</Text>
+              <Text style={[styles.pinLabel, i % 2 !== 0 && styles.pinLabelDark]} numberOfLines={1}>
+                {store.business.business_name}
+              </Text>
             </View>
           ))}
         </View>
@@ -132,20 +134,22 @@ const MapScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.cream },
+  container: { flex: 1, backgroundColor: Colors.dark },
   mapArea: {
     height: 220,
-    backgroundColor: '#D4E8D8',
+    backgroundColor: '#0d2d1a',
     margin: Spacing.lg,
     borderRadius: BorderRadius.xl,
     overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   mapPlaceholder: { alignItems: 'center', gap: 4 },
   mapEmoji: { fontSize: 48, marginBottom: 4 },
-  mapText: { fontSize: FontSize.lg, fontWeight: '700', color: Colors.primary },
+  mapText: { fontSize: FontSize.lg, fontWeight: '700', color: Colors.lime },
   mapSubtext: { fontSize: FontSize.sm, color: Colors.muted },
   pinsRow: {
     position: 'absolute',
@@ -169,18 +173,16 @@ const styles = StyleSheet.create({
   pinLime: { backgroundColor: Colors.lime },
   pinText: { fontSize: 13 },
   pinLabel: { fontSize: FontSize.xs, fontWeight: '700', color: Colors.white, flexShrink: 1 },
+  pinLabelDark: { color: Colors.dark },
   bottomSheet: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.darkCard,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.sm,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 8,
+    borderTopWidth: 1,
+    borderTopColor: Colors.border,
   },
   bottomSheetHandle: {
     width: 40,
@@ -190,16 +192,16 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginBottom: Spacing.sm,
   },
-  sheetTitle: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.charcoal },
+  sheetTitle: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.white },
   sheetSubtitle: { fontSize: FontSize.sm, color: Colors.muted, marginBottom: Spacing.md },
   storeList: { gap: Spacing.sm, paddingBottom: Spacing.xxl },
   emptyState: { alignItems: 'center', paddingVertical: Spacing.xxl, gap: Spacing.sm },
   emptyEmoji: { fontSize: 48 },
-  emptyTitle: { fontSize: FontSize.xl, fontWeight: '700', color: Colors.charcoal },
+  emptyTitle: { fontSize: FontSize.xl, fontWeight: '700', color: Colors.white },
   emptySubtitle: { fontSize: FontSize.md, color: Colors.muted },
   storeCard: {
     flexDirection: 'row',
-    backgroundColor: Colors.cream,
+    backgroundColor: Colors.dark,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     alignItems: 'center',
@@ -209,10 +211,10 @@ const styles = StyleSheet.create({
   },
   storeImageContainer: { width: 60, height: 60, borderRadius: BorderRadius.md, overflow: 'hidden' },
   storeImage: { width: '100%', height: '100%' },
-  storeImagePlaceholder: { flex: 1, backgroundColor: '#E8F0E8', alignItems: 'center', justifyContent: 'center' },
+  storeImagePlaceholder: { flex: 1, backgroundColor: '#222222', alignItems: 'center', justifyContent: 'center' },
   storeImageEmoji: { fontSize: 28 },
   storeDetails: { flex: 1 },
-  storeName: { fontSize: FontSize.md, fontWeight: '700', color: Colors.charcoal },
+  storeName: { fontSize: FontSize.md, fontWeight: '700', color: Colors.white },
   storeAddress: { fontSize: FontSize.xs, color: Colors.muted, marginTop: 2 },
   storeMetaRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginTop: 4 },
   dealCountBadge: {
@@ -221,11 +223,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
   },
-  dealCountText: { fontSize: FontSize.xs, fontWeight: '700', color: Colors.charcoal },
+  dealCountText: { fontSize: FontSize.xs, fontWeight: '700', color: Colors.dark },
   storeDistance: { fontSize: FontSize.xs, color: Colors.muted },
   storePriceBlock: { alignItems: 'flex-end' },
   storePriceFrom: { fontSize: FontSize.xs, color: Colors.muted },
-  storePrice: { fontSize: FontSize.lg, fontWeight: '800', color: Colors.primary },
+  storePrice: { fontSize: FontSize.lg, fontWeight: '800', color: Colors.lime },
 });
 
 export default MapScreen;

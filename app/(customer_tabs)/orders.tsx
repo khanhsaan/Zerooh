@@ -11,20 +11,20 @@ import LoadingScreen from '../../components/LoadingScreen';
 import { displayError } from '../../utilities/handleError';
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bg: string }> = {
-  pending:   { label: 'Pending',   color: Colors.orange,  bg: '#FFF3DC' },
-  completed: { label: 'Completed', color: '#2D7D4E',      bg: '#F0FAF4' },
-  cancelled: { label: 'Cancelled', color: Colors.error,   bg: '#FEE7EC' },
+  pending:   { label: 'Pending',   color: Colors.dark,   bg: Colors.lime },
+  completed: { label: 'Completed', color: Colors.white,  bg: Colors.primary },
+  cancelled: { label: 'Cancelled', color: Colors.white,  bg: Colors.error },
 };
 
 /**
  * OrdersScreen
  *
- * Shows the authenticated customer's order history in reverse chronological order.
- * Each row displays:
+ * Dark theme (#1a1a1a bg, #2a2a2a cards). Shows the authenticated customer's
+ * order history in reverse chronological order. Each row displays:
  * - Product thumbnail or emoji placeholder
  * - Product name, business name
- * - Quantity × price
- * - Order status pill (Pending / Completed / Cancelled)
+ * - Quantity × price (lime)
+ * - Order status pill (lime for Pending / green for Completed / red for Cancelled)
  * - Pickup time if available
  *
  * Uses `useAsyncWithTimeout` for loading, supports pull-to-refresh.
@@ -54,7 +54,7 @@ const OrdersScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.cream} />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.dark} />
 
       <View style={styles.header}>
         <Text style={styles.title}>My Orders 📋</Text>
@@ -69,8 +69,8 @@ const OrdersScreen: React.FC = () => {
           <RefreshControl
             refreshing={loading}
             onRefresh={fetchOrders}
-            tintColor={Colors.primary}
-            colors={[Colors.primary]}
+            tintColor={Colors.lime}
+            colors={[Colors.lime]}
           />
         }
         ListEmptyComponent={
@@ -128,41 +128,38 @@ const OrdersScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.cream },
+  container: { flex: 1, backgroundColor: Colors.dark },
   header: { paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, paddingBottom: Spacing.sm },
-  title: { fontSize: FontSize.xxl, fontWeight: '800', color: Colors.charcoal },
+  title: { fontSize: FontSize.xxl, fontWeight: '800', color: Colors.white },
   subtitle: { fontSize: FontSize.sm, color: Colors.muted, marginTop: 2 },
   list: { paddingHorizontal: Spacing.lg, gap: Spacing.sm, paddingBottom: Spacing.xl },
   emptyState: { alignItems: 'center', paddingTop: Spacing.xxl * 2, gap: Spacing.sm },
   emptyEmoji: { fontSize: 56 },
-  emptyTitle: { fontSize: FontSize.xl, fontWeight: '700', color: Colors.charcoal },
+  emptyTitle: { fontSize: FontSize.xl, fontWeight: '700', color: Colors.white },
   emptySubtitle: { fontSize: FontSize.md, color: Colors.muted, textAlign: 'center' },
   orderCard: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.darkCard,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     alignItems: 'center',
     gap: Spacing.sm,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: Colors.darkBorder,
   },
   orderImageContainer: { width: 60, height: 60, borderRadius: BorderRadius.md, overflow: 'hidden' },
   orderImage: { width: '100%', height: '100%' },
-  orderImagePlaceholder: { flex: 1, backgroundColor: '#F0F0E8', alignItems: 'center', justifyContent: 'center' },
+  orderImagePlaceholder: { flex: 1, backgroundColor: '#222222', alignItems: 'center', justifyContent: 'center' },
   orderImageEmoji: { fontSize: 26 },
   orderDetails: { flex: 1 },
-  orderName: { fontSize: FontSize.md, fontWeight: '700', color: Colors.charcoal },
+  orderName: { fontSize: FontSize.md, fontWeight: '700', color: Colors.white },
   orderBusiness: { fontSize: FontSize.xs, color: Colors.muted },
   orderDate: { fontSize: FontSize.xs, color: Colors.muted, marginTop: 2 },
-  orderPickup: { fontSize: FontSize.xs, color: Colors.primary, fontWeight: '500', marginTop: 2 },
+  orderPickup: { fontSize: FontSize.xs, color: Colors.lime, fontWeight: '500', marginTop: 2 },
   orderRight: { alignItems: 'flex-end', gap: 4 },
   statusPill: { borderRadius: BorderRadius.full, paddingHorizontal: 8, paddingVertical: 3 },
   statusText: { fontSize: FontSize.xs, fontWeight: '700' },
-  orderTotal: { fontSize: FontSize.md, fontWeight: '800', color: Colors.charcoal },
+  orderTotal: { fontSize: FontSize.md, fontWeight: '800', color: Colors.lime },
   orderQty: { fontSize: FontSize.xs, color: Colors.muted },
 });
 

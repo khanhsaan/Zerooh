@@ -35,11 +35,10 @@ const EMPTY_FORM: AddProductForm = {
 /**
  * BusinessDashboardScreen
  *
- * Merchant-facing home screen showing:
- * - Daily stats cards: items listed, stock remaining, revenue recovered
+ * Dark theme (#1a1a1a bg, #2a2a2a cards). Merchant-facing home screen showing:
+ * - Daily stats cards: items listed, stock remaining, revenue recovered (lime values)
  * - Active product listings with name, price, stock, and status indicator
- * - "Add Product" modal form (product name, description, original/discounted price,
- *   stock quantity, pickup window start/end)
+ * - "Add Product" modal form (dark theme inputs)
  * - Sign out action
  *
  * Uses `useProducts.getBusinessProducts` to fetch own listings and
@@ -145,8 +144,9 @@ export default function BusinessDashboardScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.dark} />
 
+      {/* Header */}
       <View style={styles.header}>
         <View>
           <Text style={styles.headerGreeting}>Good morning 👋</Text>
@@ -154,11 +154,11 @@ export default function BusinessDashboardScreen() {
         </View>
         <View style={styles.headerActions}>
           <TouchableOpacity style={styles.addButton} onPress={() => setShowAddModal(true)}>
-            <Text style={styles.addButtonText}>+ Add</Text>
+            <Text style={styles.addButtonText}>+ ADD</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={handleSignOut} disabled={signingOut} style={styles.signOutIcon}>
             {signingOut ? (
-              <ActivityIndicator color={Colors.white} size="small" />
+              <ActivityIndicator color={Colors.muted} size="small" />
             ) : (
               <Text style={styles.signOutIconText}>⏏</Text>
             )}
@@ -166,6 +166,7 @@ export default function BusinessDashboardScreen() {
         </View>
       </View>
 
+      {/* Stats */}
       <View style={styles.statsRow}>
         {[
           { emoji: '📦', value: listings.length.toString(), label: 'Active listings' },
@@ -180,6 +181,7 @@ export default function BusinessDashboardScreen() {
         ))}
       </View>
 
+      {/* Tab bar */}
       <View style={styles.tabBar}>
         {(['today', 'listings'] as const).map((tab) => (
           <TouchableOpacity
@@ -208,7 +210,7 @@ export default function BusinessDashboardScreen() {
           <View style={styles.emptyState}>
             <Text style={styles.emptyEmoji}>📭</Text>
             <Text style={styles.emptyTitle}>No listings yet</Text>
-            <Text style={styles.emptySubtitle}>Tap "+ Add" to list your first surplus item.</Text>
+            <Text style={styles.emptySubtitle}>Tap "+ ADD" to list your first surplus item.</Text>
           </View>
         }
         renderItem={({ item }) => {
@@ -245,6 +247,7 @@ export default function BusinessDashboardScreen() {
         }}
       />
 
+      {/* Add Product Modal */}
       <Modal visible={showAddModal} animationType="slide" presentationStyle="pageSheet">
         <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalHeader}>
@@ -273,7 +276,7 @@ export default function BusinessDashboardScreen() {
                 <TextInput
                   style={styles.formInput}
                   placeholder={placeholder}
-                  placeholderTextColor={Colors.muted}
+                  placeholderTextColor="rgba(255,255,255,0.3)"
                   value={form[key as keyof AddProductForm]}
                   onChangeText={(val) => setForm((f) => ({ ...f, [key]: val }))}
                   keyboardType={(keyboard as any) ?? 'default'}
@@ -287,9 +290,9 @@ export default function BusinessDashboardScreen() {
               disabled={submitting}
               activeOpacity={0.85}>
               {submitting ? (
-                <ActivityIndicator color={Colors.white} />
+                <ActivityIndicator color={Colors.dark} />
               ) : (
-                <Text style={styles.submitButtonText}>Publish Listing</Text>
+                <Text style={styles.submitButtonText}>PUBLISH LISTING</Text>
               )}
             </TouchableOpacity>
           </ScrollView>
@@ -300,17 +303,16 @@ export default function BusinessDashboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.cream },
+  container: { flex: 1, backgroundColor: Colors.dark },
   header: {
-    backgroundColor: Colors.primary,
     paddingHorizontal: Spacing.lg,
     paddingTop: Spacing.md,
-    paddingBottom: Spacing.xl,
+    paddingBottom: Spacing.lg,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
-  headerGreeting: { fontSize: FontSize.sm, color: 'rgba(255,255,255,0.7)', marginBottom: 2 },
+  headerGreeting: { fontSize: FontSize.sm, color: Colors.muted, marginBottom: 2 },
   headerName: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.white },
   headerActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   addButton: {
@@ -319,31 +321,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs + 2,
   },
-  addButtonText: { fontSize: FontSize.sm, fontWeight: '800', color: Colors.charcoal },
+  addButtonText: { fontSize: FontSize.xs, fontWeight: '800', color: Colors.dark, letterSpacing: 0.5 },
   signOutIcon: { padding: 4 },
-  signOutIconText: { fontSize: 20, color: 'rgba(255,255,255,0.7)' },
+  signOutIconText: { fontSize: 20, color: Colors.muted },
   statsRow: {
     flexDirection: 'row',
     paddingHorizontal: Spacing.lg,
-    marginTop: -Spacing.lg,
     gap: Spacing.sm,
     marginBottom: Spacing.md,
   },
   statCard: {
     flex: 1,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.darkCard,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     alignItems: 'center',
     gap: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 4,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   statEmoji: { fontSize: 22 },
-  statValue: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.primary },
+  statValue: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.lime },
   statLabel: { fontSize: FontSize.xs, color: Colors.muted, textAlign: 'center' },
   tabBar: { flexDirection: 'row', paddingHorizontal: Spacing.lg, marginBottom: Spacing.sm, gap: Spacing.sm },
   tab: {
@@ -351,50 +349,50 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.sm,
     alignItems: 'center',
     borderRadius: BorderRadius.md,
-    backgroundColor: Colors.white,
-    borderWidth: 1.5,
+    backgroundColor: Colors.darkCard,
+    borderWidth: 1,
     borderColor: Colors.border,
   },
-  tabActive: { backgroundColor: Colors.primary, borderColor: Colors.primary },
-  tabText: { fontSize: FontSize.sm, fontWeight: '600', color: Colors.charcoal },
-  tabTextActive: { color: Colors.white },
+  tabActive: { backgroundColor: Colors.lime, borderColor: Colors.lime },
+  tabText: { fontSize: FontSize.sm, fontWeight: '600', color: Colors.muted },
+  tabTextActive: { color: Colors.dark, fontWeight: '800' },
   listContent: { paddingHorizontal: Spacing.lg, gap: Spacing.sm, paddingBottom: Spacing.xxl },
   emptyState: { alignItems: 'center', paddingVertical: Spacing.xxl, gap: Spacing.sm },
   emptyEmoji: { fontSize: 48 },
-  emptyTitle: { fontSize: FontSize.xl, fontWeight: '700', color: Colors.charcoal },
+  emptyTitle: { fontSize: FontSize.xl, fontWeight: '700', color: Colors.white },
   emptySubtitle: { fontSize: FontSize.md, color: Colors.muted, textAlign: 'center' },
   listingCard: {
     flexDirection: 'row',
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.darkCard,
     borderRadius: BorderRadius.lg,
     padding: Spacing.md,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 6,
-    elevation: 2,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   listingLeft: { flex: 1, gap: 4 },
-  listingName: { fontSize: FontSize.md, fontWeight: '700', color: Colors.charcoal },
+  listingName: { fontSize: FontSize.md, fontWeight: '700', color: Colors.white },
   listingDescription: { fontSize: FontSize.xs, color: Colors.muted },
   listingPriceRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.xs },
-  listingSalePrice: { fontSize: FontSize.md, fontWeight: '800', color: Colors.primary },
+  listingSalePrice: { fontSize: FontSize.md, fontWeight: '800', color: Colors.lime },
   listingOrigPrice: { fontSize: FontSize.xs, color: Colors.muted, textDecorationLine: 'line-through' },
   listingRight: { alignItems: 'flex-end', gap: Spacing.xs },
   stockBadge: {
-    backgroundColor: Colors.lime,
+    backgroundColor: 'rgba(217,224,33,0.15)',
     borderRadius: BorderRadius.full,
     paddingHorizontal: 8,
     paddingVertical: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(217,224,33,0.3)',
   },
-  stockBadgeLow: { backgroundColor: '#FEE7EC' },
-  stockText: { fontSize: FontSize.xs, fontWeight: '700', color: Colors.charcoal },
+  stockBadgeLow: { backgroundColor: 'rgba(212,24,61,0.15)', borderColor: 'rgba(212,24,61,0.3)' },
+  stockText: { fontSize: FontSize.xs, fontWeight: '700', color: Colors.lime },
   stockTextLow: { color: Colors.error },
   statusDot: { width: 10, height: 10, borderRadius: 5 },
   statusDotActive: { backgroundColor: '#34D399' },
   statusDotSoldOut: { backgroundColor: Colors.muted },
-  modalContainer: { flex: 1, backgroundColor: Colors.cream },
+  // Modal styles
+  modalContainer: { flex: 1, backgroundColor: Colors.dark },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -402,34 +400,33 @@ const styles = StyleSheet.create({
     padding: Spacing.lg,
     borderBottomWidth: 1,
     borderBottomColor: Colors.border,
-    backgroundColor: Colors.white,
   },
-  modalTitle: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.charcoal },
+  modalTitle: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.white },
   modalClose: { fontSize: 20, color: Colors.muted, padding: 4 },
   modalScroll: { padding: Spacing.lg, gap: Spacing.xs, paddingBottom: Spacing.xxl },
-  formLabel: { fontSize: FontSize.sm, fontWeight: '600', color: Colors.charcoal, marginBottom: 4, marginTop: Spacing.sm },
+  formLabel: { fontSize: FontSize.sm, fontWeight: '600', color: Colors.white, marginBottom: 4, marginTop: Spacing.sm },
   formInput: {
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.darkCard,
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     fontSize: FontSize.md,
-    color: Colors.charcoal,
+    color: Colors.white,
     borderWidth: 1.5,
     borderColor: Colors.border,
   },
   submitButton: {
-    backgroundColor: Colors.orange,
+    backgroundColor: Colors.lime,
     borderRadius: BorderRadius.lg,
     paddingVertical: Spacing.md + 2,
     alignItems: 'center',
     marginTop: Spacing.lg,
-    shadowColor: Colors.orange,
+    shadowColor: Colors.lime,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 4,
   },
   disabled: { opacity: 0.7 },
-  submitButtonText: { fontSize: FontSize.lg, fontWeight: '700', color: Colors.white },
+  submitButtonText: { fontSize: FontSize.md, fontWeight: '800', color: Colors.dark, letterSpacing: 0.5 },
 });

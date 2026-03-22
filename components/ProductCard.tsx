@@ -9,7 +9,6 @@ import {
 } from 'react-native';
 import { Colors, BorderRadius, FontSize, Spacing } from '../constants/Colors';
 import { Product } from '../types';
-import DealBadge from './DealBadge';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = (width - Spacing.lg * 2 - Spacing.sm) / 2;
@@ -23,12 +22,13 @@ interface Props {
 /**
  * ProductCard
  *
- * A two-column grid card showing a food deal. Displays:
+ * A two-column grid card showing a food deal. Dark theme (#2a2a2a card).
+ * Displays:
  * - Product image (first image from images array, or a placeholder emoji)
- * - Discount percentage badge (lime) in the top-left corner
+ * - Orange discount percentage badge in the top-left corner
  * - Product name, business name, pickup window
- * - Original price (strikethrough) + discounted price
- * - "Add to Cart" button (orange CTA)
+ * - Lime discounted price + strikethrough original price
+ * - Lime "+ Cart" CTA button
  *
  * Used in HomeScreen's deal feed grid.
  *
@@ -88,7 +88,7 @@ const ProductCard: React.FC<Props> = ({ product, onPress, onAddToCart }) => {
 
         {/* CTA */}
         <TouchableOpacity style={styles.addButton} onPress={onAddToCart} activeOpacity={0.85}>
-          <Text style={styles.addButtonText}>+ Cart</Text>
+          <Text style={styles.addButtonText}>+ CART</Text>
         </TouchableOpacity>
       </View>
     </TouchableOpacity>
@@ -107,14 +107,11 @@ function formatPickup(start: string | null, end: string | null): string {
 const styles = StyleSheet.create({
   card: {
     width: CARD_WIDTH,
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.darkCard,
     borderRadius: BorderRadius.lg,
     overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.09,
-    shadowRadius: 12,
-    elevation: 4,
+    borderWidth: 1,
+    borderColor: Colors.darkBorder,
   },
   imageContainer: {
     width: '100%',
@@ -128,7 +125,7 @@ const styles = StyleSheet.create({
   imagePlaceholder: {
     width: '100%',
     height: '100%',
-    backgroundColor: '#F0F0E8',
+    backgroundColor: '#222222',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -139,7 +136,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     left: 8,
-    backgroundColor: Colors.lime,
+    backgroundColor: Colors.orange,
     borderRadius: BorderRadius.full,
     paddingHorizontal: 7,
     paddingVertical: 3,
@@ -147,7 +144,7 @@ const styles = StyleSheet.create({
   discountText: {
     fontSize: FontSize.xs - 1,
     fontWeight: '800',
-    color: Colors.charcoal,
+    color: Colors.white,
   },
   lastChanceBadge: {
     position: 'absolute',
@@ -170,7 +167,7 @@ const styles = StyleSheet.create({
   productName: {
     fontSize: FontSize.sm,
     fontWeight: '700',
-    color: Colors.charcoal,
+    color: Colors.white,
   },
   businessName: {
     fontSize: FontSize.xs,
@@ -190,7 +187,7 @@ const styles = StyleSheet.create({
   salePrice: {
     fontSize: FontSize.md,
     fontWeight: '800',
-    color: Colors.primary,
+    color: Colors.lime,
   },
   originalPrice: {
     fontSize: FontSize.xs,
@@ -198,7 +195,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'line-through',
   },
   addButton: {
-    backgroundColor: Colors.orange,
+    backgroundColor: Colors.lime,
     borderRadius: BorderRadius.md,
     paddingVertical: 6,
     alignItems: 'center',
@@ -207,7 +204,7 @@ const styles = StyleSheet.create({
   addButtonText: {
     fontSize: FontSize.xs,
     fontWeight: '800',
-    color: Colors.white,
+    color: Colors.dark,
     letterSpacing: 0.3,
   },
 });

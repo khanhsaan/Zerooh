@@ -12,11 +12,12 @@ import { displayError } from '../../utilities/handleError';
 /**
  * ProfileScreen
  *
- * Customer account screen displaying:
- * - Avatar initials badge (lime, generated from first name)
+ * Dark theme (#1a1a1a bg, #2a2a2a cards). Customer account screen displaying:
+ * - Lime avatar initials badge (generated from first name)
  * - First name, email address
- * - Impact stats: meals rescued, CO₂ saved (static for now)
- * - Sign out button
+ * - Green gradient impact stats card (meals rescued, CO₂ saved, total saved)
+ * - Dark menu items with lime icon backgrounds
+ * - Sign out button (orange styling)
  *
  * Uses `useProfile` to fetch name/email and `useAuth.signOutHandle` to log out.
  * Errors surface via Alert using `displayError`.
@@ -74,7 +75,7 @@ const ProfileScreen: React.FC = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.cream} />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.dark} />
       <ScrollView contentContainerStyle={styles.scroll}>
 
         {/* Avatar */}
@@ -89,7 +90,7 @@ const ProfileScreen: React.FC = () => {
           </View>
         </View>
 
-        {/* Impact stats */}
+        {/* Impact stats — green gradient card */}
         <View style={styles.statsCard}>
           <Text style={styles.statsTitle}>Your Impact</Text>
           <View style={styles.statsRow}>
@@ -115,9 +116,14 @@ const ProfileScreen: React.FC = () => {
             { icon: '📍', label: 'Saved Addresses' },
             { icon: '❓', label: 'Help & Support' },
             { icon: 'ℹ️', label: 'About Zeroooh!' },
-          ].map((item, i) => (
-            <TouchableOpacity key={i} style={styles.menuItem} activeOpacity={0.7}>
-              <Text style={styles.menuIcon}>{item.icon}</Text>
+          ].map((item, i, arr) => (
+            <TouchableOpacity
+              key={i}
+              style={[styles.menuItem, i < arr.length - 1 && styles.menuItemBorder]}
+              activeOpacity={0.7}>
+              <View style={styles.menuIconBadge}>
+                <Text style={styles.menuIcon}>{item.icon}</Text>
+              </View>
               <Text style={styles.menuLabel}>{item.label}</Text>
               <Text style={styles.menuArrow}>›</Text>
             </TouchableOpacity>
@@ -131,7 +137,7 @@ const ProfileScreen: React.FC = () => {
           disabled={signingOut}
           activeOpacity={0.85}>
           {signingOut ? (
-            <ActivityIndicator color={Colors.error} />
+            <ActivityIndicator color={Colors.white} />
           ) : (
             <Text style={styles.signOutText}>Sign Out</Text>
           )}
@@ -144,7 +150,7 @@ const ProfileScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.cream },
+  container: { flex: 1, backgroundColor: Colors.dark },
   scroll: { paddingBottom: Spacing.xxl },
   avatarSection: { alignItems: 'center', paddingVertical: Spacing.xl, paddingTop: Spacing.xxl },
   avatar: {
@@ -161,8 +167,8 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 4,
   },
-  avatarText: { fontSize: FontSize.huge, fontWeight: '900', color: Colors.charcoal },
-  name: { fontSize: FontSize.xxl, fontWeight: '800', color: Colors.charcoal, marginBottom: 4 },
+  avatarText: { fontSize: FontSize.huge, fontWeight: '900', color: Colors.dark },
+  name: { fontSize: FontSize.xxl, fontWeight: '800', color: Colors.white, marginBottom: 4 },
   email: { fontSize: FontSize.md, color: Colors.muted, marginBottom: Spacing.sm },
   memberBadge: {
     backgroundColor: Colors.primary,
@@ -172,57 +178,60 @@ const styles = StyleSheet.create({
   },
   memberBadgeText: { fontSize: FontSize.sm, fontWeight: '700', color: Colors.white },
   statsCard: {
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.primary,
     marginHorizontal: Spacing.lg,
     borderRadius: BorderRadius.lg,
     padding: Spacing.lg,
     marginBottom: Spacing.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
   },
-  statsTitle: { fontSize: FontSize.md, fontWeight: '700', color: Colors.charcoal, marginBottom: Spacing.md },
+  statsTitle: { fontSize: FontSize.md, fontWeight: '700', color: 'rgba(255,255,255,0.8)', marginBottom: Spacing.md },
   statsRow: { flexDirection: 'row', justifyContent: 'space-around' },
   statItem: { alignItems: 'center', gap: 4 },
   statEmoji: { fontSize: 22 },
-  statValue: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.primary },
-  statLabel: { fontSize: FontSize.xs, color: Colors.muted, textAlign: 'center' },
+  statValue: { fontSize: FontSize.xl, fontWeight: '800', color: Colors.lime },
+  statLabel: { fontSize: FontSize.xs, color: 'rgba(255,255,255,0.65)', textAlign: 'center' },
   menuSection: {
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.darkCard,
     marginHorizontal: Spacing.lg,
     borderRadius: BorderRadius.lg,
     overflow: 'hidden',
     marginBottom: Spacing.lg,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
   menuItem: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: Spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
     gap: Spacing.md,
   },
-  menuIcon: { fontSize: 20, width: 28 },
-  menuLabel: { flex: 1, fontSize: FontSize.md, color: Colors.charcoal, fontWeight: '500' },
+  menuItemBorder: {
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.border,
+  },
+  menuIconBadge: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: 'rgba(217,224,33,0.15)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  menuIcon: { fontSize: 18 },
+  menuLabel: { flex: 1, fontSize: FontSize.md, color: Colors.white, fontWeight: '500' },
   menuArrow: { fontSize: 20, color: Colors.muted },
   signOutButton: {
     marginHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.lg,
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: Colors.error,
+    backgroundColor: 'rgba(255,107,53,0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,107,53,0.3)',
     marginBottom: Spacing.md,
   },
   disabled: { opacity: 0.7 },
-  signOutText: { fontSize: FontSize.lg, fontWeight: '700', color: Colors.error },
+  signOutText: { fontSize: FontSize.lg, fontWeight: '700', color: Colors.orange },
   version: { textAlign: 'center', fontSize: FontSize.xs, color: Colors.muted },
 });
 

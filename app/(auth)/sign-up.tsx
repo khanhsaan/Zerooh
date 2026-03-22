@@ -21,7 +21,7 @@ import useAuth from '../../hooks/useAuth';
 /**
  * SignUpScreen
  *
- * Account creation screen for both customers and business partners.
+ * Account creation screen for both customers and business partners. Dark theme (#1a1a1a).
  * Reads `isBusiness` from Expo Router search params (string 'true'/'false').
  * Calls `useAuth.signUpHandle` with `userMetadata: { isBusiness }`.
  * On success, AuthContext session change automatically redirects.
@@ -59,7 +59,7 @@ export default function SignUpScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor={Colors.cream} />
+      <StatusBar barStyle="light-content" backgroundColor={Colors.dark} />
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
@@ -91,7 +91,7 @@ export default function SignUpScreen() {
             <TextInput
               style={styles.input}
               placeholder="you@example.com"
-              placeholderTextColor={Colors.muted}
+              placeholderTextColor="rgba(255,255,255,0.3)"
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -103,7 +103,7 @@ export default function SignUpScreen() {
               <TextInput
                 style={styles.inputInner}
                 placeholder="Min. 8 characters"
-                placeholderTextColor={Colors.muted}
+                placeholderTextColor="rgba(255,255,255,0.3)"
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={!showPassword}
@@ -115,7 +115,7 @@ export default function SignUpScreen() {
                 <Ionicons
                   name={showPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={20}
-                  color={Colors.muted}
+                  color="rgba(255,255,255,0.4)"
                 />
               </TouchableOpacity>
             </View>
@@ -125,7 +125,7 @@ export default function SignUpScreen() {
               <TextInput
                 style={styles.inputInner}
                 placeholder="Repeat your password"
-                placeholderTextColor={Colors.muted}
+                placeholderTextColor="rgba(255,255,255,0.3)"
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry={!showConfirmPassword}
@@ -137,7 +137,7 @@ export default function SignUpScreen() {
                 <Ionicons
                   name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
                   size={20}
-                  color={Colors.muted}
+                  color="rgba(255,255,255,0.4)"
                 />
               </TouchableOpacity>
             </View>
@@ -148,9 +148,9 @@ export default function SignUpScreen() {
               disabled={loading}
               activeOpacity={0.85}>
               {loading ? (
-                <ActivityIndicator color={Colors.white} />
+                <ActivityIndicator color={Colors.dark} />
               ) : (
-                <Text style={styles.signupButtonText}>Create Account</Text>
+                <Text style={styles.signupButtonText}>CREATE ACCOUNT</Text>
               )}
             </TouchableOpacity>
 
@@ -168,10 +168,10 @@ export default function SignUpScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.cream },
+  container: { flex: 1, backgroundColor: Colors.dark },
   scroll: { flexGrow: 1, paddingHorizontal: Spacing.lg, paddingTop: Spacing.md },
   back: { marginBottom: Spacing.lg },
-  backText: { fontSize: FontSize.md, color: Colors.primary, fontWeight: '600' },
+  backText: { fontSize: FontSize.md, color: Colors.lime, fontWeight: '600' },
   header: { marginBottom: Spacing.xl },
   badge: {
     backgroundColor: Colors.lime,
@@ -182,25 +182,25 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   badgeCustomer: { backgroundColor: Colors.orange },
-  badgeText: { fontSize: FontSize.sm, fontWeight: '700', color: Colors.charcoal },
-  title: { fontSize: FontSize.xxl, fontWeight: '800', color: Colors.charcoal, marginBottom: Spacing.xs },
+  badgeText: { fontSize: FontSize.sm, fontWeight: '700', color: Colors.dark },
+  title: { fontSize: FontSize.xxl, fontWeight: '800', color: Colors.white, marginBottom: Spacing.xs },
   subtitle: { fontSize: FontSize.md, color: Colors.muted, lineHeight: 22 },
   form: { gap: Spacing.xs },
-  label: { fontSize: FontSize.sm, fontWeight: '600', color: Colors.charcoal, marginBottom: 2, marginTop: Spacing.sm },
+  label: { fontSize: FontSize.sm, fontWeight: '600', color: Colors.white, marginBottom: 2, marginTop: Spacing.sm },
   input: {
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.darkCard,
     borderRadius: BorderRadius.md,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     fontSize: FontSize.md,
-    color: Colors.charcoal,
+    color: Colors.white,
     borderWidth: 1.5,
     borderColor: Colors.border,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.white,
+    backgroundColor: Colors.darkCard,
     borderRadius: BorderRadius.md,
     borderWidth: 1.5,
     borderColor: Colors.border,
@@ -210,27 +210,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     fontSize: FontSize.md,
-    color: Colors.charcoal,
+    color: Colors.white,
   },
   eyeButton: {
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
   },
   signupButton: {
-    backgroundColor: Colors.orange,
+    backgroundColor: Colors.lime,
     borderRadius: BorderRadius.lg,
     paddingVertical: Spacing.md + 2,
     alignItems: 'center',
     marginTop: Spacing.md,
-    shadowColor: Colors.orange,
+    shadowColor: Colors.lime,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 10,
     elevation: 4,
   },
   disabled: { opacity: 0.7 },
-  signupButtonText: { fontSize: FontSize.lg, fontWeight: '700', color: Colors.white },
+  signupButtonText: { fontSize: FontSize.md, fontWeight: '800', color: Colors.dark, letterSpacing: 0.5 },
   loginLink: { alignItems: 'center', paddingVertical: Spacing.md },
-  loginLinkText: { fontSize: FontSize.md, color: Colors.charcoal },
-  loginLinkAccent: { color: Colors.primary, fontWeight: '700' },
+  loginLinkText: { fontSize: FontSize.md, color: Colors.muted },
+  loginLinkAccent: { color: Colors.lime, fontWeight: '700' },
 });
