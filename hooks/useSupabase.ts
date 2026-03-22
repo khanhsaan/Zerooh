@@ -1,12 +1,10 @@
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/supabase-js';
 import { AppState, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ResponseType } from '../types';
 import { useEffect, useMemo } from 'react';
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@env';
-
-const supabaseUrl = SUPABASE_URL;
-const supabaseKey = SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
+const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
 /**
  * useSupabase
