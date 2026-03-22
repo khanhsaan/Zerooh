@@ -300,21 +300,21 @@ export default function BusinessDashboardScreen() {
         </TouchableOpacity>
       </ScrollView>
 
-      {/* Date / Time Picker */}
-      <DateTimePickerModal
-        visible={pickerTarget !== null}
-        title={pickerTarget === 'pickupStart' ? 'Pickup Start' : 'Pickup End'}
-        value={pickerTarget ? form[pickerTarget] : null}
-        onConfirm={(date) => {
-          if (pickerTarget) setForm(f => ({ ...f, [pickerTarget]: date }));
-          setPickerTarget(null);
-        }}
-        onCancel={() => setPickerTarget(null)}
-      />
-
       {/* Add Product Modal */}
       <Modal visible={showAddModal} animationType="slide" presentationStyle="pageSheet">
         <SafeAreaView style={styles.modalContainer}>
+
+          {/* Date / Time Picker — must live inside the pageSheet modal to appear on top of it */}
+          <DateTimePickerModal
+            visible={pickerTarget !== null}
+            title={pickerTarget === 'pickupStart' ? 'Pickup Start' : 'Pickup End'}
+            value={pickerTarget ? form[pickerTarget] : null}
+            onConfirm={(date) => {
+              if (pickerTarget) setForm(f => ({ ...f, [pickerTarget]: date }));
+              setPickerTarget(null);
+            }}
+            onCancel={() => setPickerTarget(null)}
+          />
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>Add Surplus Item</Text>
             <TouchableOpacity
