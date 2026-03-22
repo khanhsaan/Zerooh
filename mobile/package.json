@@ -9,7 +9,10 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "test": "jest --watchAll"
+    "test": "jest --watchAll",
+    "reset": "expo start --clear",
+    "reset:ios": "xcrun simctl erase all && expo start --ios --clear",
+    "reset:android": "adb shell pm clear com.zeroooh.app && expo start --android --clear"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
