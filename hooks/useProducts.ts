@@ -22,7 +22,7 @@ export const useProducts = (): ResponseType => {
         *,
         images:product_images(*),
         category:product_categories(*),
-        business:business_profiles!products_user_id_fkey(*)
+        business:business_profiles!products_business_profile_fkey(*)
       `)
       .order('created_at', { ascending: false });
 
@@ -62,7 +62,7 @@ export const useProducts = (): ResponseType => {
           *,
           images:product_images(*),
           category:product_categories(*),
-          business:business_profiles!products_user_id_fkey(*)
+          business:business_profiles!products_business_profile_fkey(*)
         `)
         .eq('id', productId)
         .single();

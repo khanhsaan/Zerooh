@@ -2,14 +2,38 @@ import { createClient } from '@supabase/supabase-js';
 import { AppState, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ResponseType } from '../types';
-import { useEffect, useMemo } from 'react';
+import { useEffect } from 'react';
+
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
 const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
 
 /**
+ * Module-level singleton so every caller (AuthContextProvider, useAuth, etc.)
+ * shares the exact same SupabaseClient instance. This ensures that
+ * `onAuthStateChange` subscriptions fire regardless of which call site
+ * triggers `signInWithPassword` / `signOut`.
+ */
+const supabaseInstance =
+  supabaseUrl && supabaseKey
+    ? createClient(supabaseUrl, supabaseKey, {
+        auth: {
+          ...(Platform.OS !== 'web' ? { storage: AsyncStorage } : {}),
+          autoRefreshToken: true,
+          persistSession: true,
+          detectSessionInUrl: false,
+        },
+        realtime: {
+          params: {
+            eventPerSeconds: 10,
+          },
+        },
+      })
+    : null;
+
+/**
  * useSupabase
  *
- * Creates and memoises the Supabase client singleton.
+ * Returns the shared Supabase client singleton.
  * - Reads SUPABASE_URL and SUPABASE_ANON_KEY from the .env file via react-native-dotenv.
  * - Configures AsyncStorage-backed session persistence on iOS/Android.
  * - Listens to AppState changes to start/stop token auto-refresh, preventing
@@ -19,25 +43,7 @@ const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY ?? '';
  * `{ data: null, error: { message, isFatal: true } }` when the env vars are missing.
  */
 export const useSupabase = (): ResponseType => {
-  const supabase = useMemo(() => {
-    if (!supabaseUrl || !supabaseKey) {
-      console.error('Supabase URL or Supabase Key is missing');
-      return null;
-    }
-    return createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        ...(Platform.OS !== 'web' ? { storage: AsyncStorage } : {}),
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: false,
-      },
-      realtime: {
-        params: {
-          eventPerSeconds: 10,
-        },
-      },
-    });
-  }, []);
+  const supabase = supabaseInstance;
 
   useEffect(() => {
     if (!supabase || Platform.OS === 'web') return;

@@ -31,5 +31,5 @@ export default function Index() {
   }
 
   const isBusiness = session.user?.user_metadata?.isBusiness === true;
-  return <Redirect href={isBusiness ? '/(business_tabs)/' : '/(customer_tabs)/'} />;
+  return <Redirect href={isBusiness ? '/(business_tabs)' : '/(customer_tabs)'} />;
 }

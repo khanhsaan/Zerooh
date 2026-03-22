@@ -51,7 +51,7 @@ export default function BusinessProfileSetupScreen() {
     if (result.error) {
       Alert.alert('Error', result.error.message);
     } else {
-      router.replace('/(business_tabs)/');
+      router.replace('/(business_tabs)');
     }
   };
 
