@@ -55,7 +55,13 @@ export default function ProductDetailScreen() {
     [getProductById, productId],
   );
 
-  const { data: product, error, loading } = useAsyncWithTimeout<Product>(fetchFn, 10000, false);
+  const { data: product, error, loading, execute: fetchProduct } = useAsyncWithTimeout<Product>(fetchFn, 10000, false);
+
+  // Trigger fetch once getProductById is available (or when productId changes).
+  // execute() is stable as long as fetchFn is stable, which depends on getProductById.
+  useEffect(() => {
+    if (getProductById) fetchProduct();
+  }, [fetchProduct]);
 
   useEffect(() => {
     if (error) {
