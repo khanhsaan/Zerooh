@@ -77,7 +77,15 @@ export const useProducts = (): ResponseType => {
     async (product: Partial<Product>): Promise<ResponseType> => {
       if (!supabase) return { data: null, error: { message: 'Null Supabase client', isFatal: true } };
 
-      const { data, error } = await supabase.from('products').insert(product).select().single();
+      // RLS policy checks auth.uid() = user_id, so user_id must be set explicitly.
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return { data: null, error: { message: 'Not authenticated', isFatal: false } };
+
+      const { data, error } = await supabase
+        .from('products')
+        .insert({ ...product, user_id: user.id })
+        .select()
+        .single();
 
       if (error) return { data: null, error: { message: `Error creating product: ${error.message}`, isFatal: false } };
       return { data, error: null };
