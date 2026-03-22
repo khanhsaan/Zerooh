@@ -1,5 +1,5 @@
 import 'react-native-url-polyfill/auto';
-import { Stack } from 'expo-router';
+import { Stack, useRouter, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { AuthContextProvider } from '../context/AuthContext';
 import useAuthContext from '../hooks/useAuthContext';
@@ -15,20 +15,38 @@ import { Colors } from '../constants/Colors';
  * Inner component that consumes AuthContext and renders the root Stack navigator.
  * Shows a loading indicator while auth state is resolving, then surfaces any
  * fatal auth errors via `displayError` before rendering the navigation shell.
+ *
+ * Watches `authSession` to drive navigation:
+ * - Session lost (sign-out) from any screen → redirect to splash.
+ * - Session gained (sign-in) while on an auth screen → redirect to index,
+ *   which then routes to the correct customer/business tabs.
  */
 function AppContent() {
   const [errorState, setErrorState] = useState<ErrorType | null>(null);
   const authContextResponse = useAuthContext();
+  const router = useRouter();
+  const segments = useSegments();
 
   useEffect(() => {
     logErrorAndSetState('useAuthContext', authContextResponse.error, setErrorState);
   }, [authContextResponse.error]);
 
+  const authLoading = authContextResponse.data?.authLoading ?? true;
+  const authSession = authContextResponse.data?.authSession ?? null;
+
+  useEffect(() => {
+    if (authLoading) return;
+    const inAuthGroup = segments[0] === '(auth)';
+    if (!authSession && !inAuthGroup) {
+      router.replace('/(auth)/splash');
+    } else if (authSession && inAuthGroup) {
+      router.replace('/');
+    }
+  }, [authSession, authLoading]);
+
   if (errorState) {
     displayError('Something is wrong, please restart the application', true);
   }
-
-  const authLoading = authContextResponse.data?.authLoading ?? true;
 
   if (authLoading) {
     return (
