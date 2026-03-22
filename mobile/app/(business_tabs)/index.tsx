@@ -22,6 +22,7 @@ import { useAsyncWithTimeout } from '../../hooks/useAsyncWithTimeout';
 import { Product } from '../../types';
 import LoadingScreen from '../../components/LoadingScreen';
 import { displayError } from '../../utilities/handleError';
+import DateTimePickerModal from '../../components/DateTimePickerModal';
 
 interface AddProductForm {
   productName: string;
@@ -29,8 +30,8 @@ interface AddProductForm {
   originalPrice: string;
   discountedPrice: string;
   stock: string;
-  pickupStart: string;
-  pickupEnd: string;
+  pickupStart: Date | null;
+  pickupEnd: Date | null;
 }
 
 const EMPTY_FORM: AddProductForm = {
@@ -39,9 +40,26 @@ const EMPTY_FORM: AddProductForm = {
   originalPrice: '',
   discountedPrice: '',
   stock: '',
-  pickupStart: '',
-  pickupEnd: '',
+  pickupStart: null,
+  pickupEnd: null,
 };
+
+/** Formats a Date for display in the picker trigger button. */
+function formatPickupDate(date: Date | null): string {
+  if (!date) return 'Tap to set';
+  return date.toLocaleDateString('en-AU', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
+
+/** Formats a Date's time portion for display in the picker trigger button. */
+function formatPickupTime(date: Date | null): string {
+  if (!date) return '--:--';
+  return date.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit', hour12: false });
+}
 
 /**
  * BusinessDashboardScreen
@@ -61,6 +79,7 @@ export default function BusinessDashboardScreen() {
   const [form, setForm] = useState<AddProductForm>(EMPTY_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [pickerTarget, setPickerTarget] = useState<'pickupStart' | 'pickupEnd' | null>(null);
 
   const productsHook = useProducts();
   const profileHook = useProfile();
@@ -128,8 +147,8 @@ export default function BusinessDashboardScreen() {
       original_price_cents: Math.round(parseFloat(form.originalPrice) * 100),
       discounted_price_cents: Math.round(parseFloat(form.discountedPrice) * 100),
       stock: parseInt(form.stock, 10),
-      pickup_start: form.pickupStart ? new Date(form.pickupStart).toISOString() : null,
-      pickup_end: form.pickupEnd ? new Date(form.pickupEnd).toISOString() : null,
+      pickup_start: form.pickupStart ? form.pickupStart.toISOString() : null,
+      pickup_end: form.pickupEnd ? form.pickupEnd.toISOString() : null,
     });
     setSubmitting(false);
     if (result.error) {
@@ -281,6 +300,18 @@ export default function BusinessDashboardScreen() {
         </TouchableOpacity>
       </ScrollView>
 
+      {/* Date / Time Picker */}
+      <DateTimePickerModal
+        visible={pickerTarget !== null}
+        title={pickerTarget === 'pickupStart' ? 'Pickup Start' : 'Pickup End'}
+        value={pickerTarget ? form[pickerTarget] : null}
+        onConfirm={(date) => {
+          if (pickerTarget) setForm(f => ({ ...f, [pickerTarget]: date }));
+          setPickerTarget(null);
+        }}
+        onCancel={() => setPickerTarget(null)}
+      />
+
       {/* Add Product Modal */}
       <Modal visible={showAddModal} animationType="slide" presentationStyle="pageSheet">
         <SafeAreaView style={styles.modalContainer}>
@@ -296,14 +327,13 @@ export default function BusinessDashboardScreen() {
           </View>
 
           <ScrollView contentContainerStyle={styles.modalScroll} keyboardShouldPersistTaps="handled">
+            {/* ── Text fields ── */}
             {[
               { key: 'productName', label: 'Item Name *', placeholder: 'e.g. Morning Pastry Pack' },
               { key: 'shortDescription', label: 'Description', placeholder: 'Brief description of the item' },
               { key: 'originalPrice', label: 'Original Price * ($)', placeholder: '10.00', keyboard: 'numeric' },
               { key: 'discountedPrice', label: 'Sale Price * ($)', placeholder: '3.99', keyboard: 'numeric' },
               { key: 'stock', label: 'Quantity Available *', placeholder: '5', keyboard: 'numeric' },
-              { key: 'pickupStart', label: 'Pickup Start (YYYY-MM-DDTHH:MM)', placeholder: '2026-03-22T09:00' },
-              { key: 'pickupEnd', label: 'Pickup End (YYYY-MM-DDTHH:MM)', placeholder: '2026-03-22T11:00' },
             ].map(({ key, label, placeholder, keyboard }) => (
               <View key={key}>
                 <Text style={styles.formLabel}>{label}</Text>
@@ -311,12 +341,48 @@ export default function BusinessDashboardScreen() {
                   style={styles.formInput}
                   placeholder={placeholder}
                   placeholderTextColor={Colors.w30}
-                  value={form[key as keyof AddProductForm]}
+                  value={form[key as keyof AddProductForm] as string}
                   onChangeText={(val) => setForm((f) => ({ ...f, [key]: val }))}
                   keyboardType={(keyboard as any) ?? 'default'}
                 />
               </View>
             ))}
+
+            {/* ── Pickup Start ── */}
+            <Text style={styles.formLabel}>Pickup Start</Text>
+            <TouchableOpacity
+              style={styles.datePickerBtn}
+              onPress={() => setPickerTarget('pickupStart')}
+              activeOpacity={0.75}>
+              <View style={styles.datePickerContent}>
+                <View style={styles.datePickerIconWrap}>
+                  <Ionicons name="calendar-outline" size={18} color={Colors.lime} />
+                </View>
+                <View style={styles.datePickerTexts}>
+                  <Text style={styles.datePickerDate}>{formatPickupDate(form.pickupStart)}</Text>
+                  <Text style={styles.datePickerTime}>{formatPickupTime(form.pickupStart)}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={Colors.w30} />
+              </View>
+            </TouchableOpacity>
+
+            {/* ── Pickup End ── */}
+            <Text style={styles.formLabel}>Pickup End</Text>
+            <TouchableOpacity
+              style={styles.datePickerBtn}
+              onPress={() => setPickerTarget('pickupEnd')}
+              activeOpacity={0.75}>
+              <View style={styles.datePickerContent}>
+                <View style={styles.datePickerIconWrap}>
+                  <Ionicons name="time-outline" size={18} color={Colors.orange} />
+                </View>
+                <View style={styles.datePickerTexts}>
+                  <Text style={styles.datePickerDate}>{formatPickupDate(form.pickupEnd)}</Text>
+                  <Text style={styles.datePickerTime}>{formatPickupTime(form.pickupEnd)}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={Colors.w30} />
+              </View>
+            </TouchableOpacity>
 
             <TouchableOpacity
               style={[styles.submitButton, submitting && styles.disabled]}
@@ -536,6 +602,39 @@ const styles = StyleSheet.create({
     color: Colors.white,
     borderWidth: 1.5,
     borderColor: Colors.w10,
+  },
+  datePickerBtn: {
+    backgroundColor: Colors.darkGray,
+    borderRadius: 12,
+    borderWidth: 1.5,
+    borderColor: Colors.w10,
+    marginBottom: 4,
+  },
+  datePickerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    gap: 12,
+  },
+  datePickerIconWrap: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: Colors.w10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  datePickerTexts: { flex: 1 },
+  datePickerDate: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.white,
+    marginBottom: 2,
+  },
+  datePickerTime: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: Colors.w40,
   },
   submitButton: {
     backgroundColor: Colors.lime,
