@@ -8,6 +8,18 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@env';
 const supabaseUrl = SUPABASE_URL;
 const supabaseKey = SUPABASE_ANON_KEY;
 
+/**
+ * useSupabase
+ *
+ * Creates and memoises the Supabase client singleton.
+ * - Reads SUPABASE_URL and SUPABASE_ANON_KEY from the .env file via react-native-dotenv.
+ * - Configures AsyncStorage-backed session persistence on iOS/Android.
+ * - Listens to AppState changes to start/stop token auto-refresh, preventing
+ *   stale sessions when the app moves between foreground and background.
+ *
+ * Returns `{ data: { supabase }, error: null }` on success, or
+ * `{ data: null, error: { message, isFatal: true } }` when the env vars are missing.
+ */
 export const useSupabase = (): ResponseType => {
   const supabase = useMemo(() => {
     if (!supabaseUrl || !supabaseKey) {

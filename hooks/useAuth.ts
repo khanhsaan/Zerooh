@@ -4,6 +4,22 @@ import { useSupabase } from './useSupabase';
 import { useCallback, useEffect, useState } from 'react';
 import { logErrorAndSetState } from '../utilities/handleError';
 
+/**
+ * useAuth
+ *
+ * Exposes authentication actions backed by the Supabase Auth API.
+ * All functions return `ResponseType` — they never throw.
+ *
+ * Returned via `data`:
+ *   - `signInHandle({ userEmail, userPassword })` — signs the user in with email/password.
+ *   - `signUpHandle({ userEmail, userPassword, userConfirmPassword, userMetadata })` —
+ *       registers a new user; validates field presence and password match before calling Supabase.
+ *   - `signOutHandle()` — signs the current user out.
+ *
+ * Error severity:
+ *   - `isFatal: true` when the Supabase client is unavailable (env vars missing).
+ *   - `isFatal: false` for validation failures or Supabase API errors.
+ */
 export const useAuth = (): ResponseType => {
   const [errorState, setErrorState] = useState<ErrorType | null>(null);
   const useSupabaseResponse = useSupabase();

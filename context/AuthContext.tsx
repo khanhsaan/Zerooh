@@ -7,6 +7,18 @@ import { restartAppMessage, signOutMessage } from '../constants/errorMessages';
 
 export const AuthContext = createContext<AuthContextObject | undefined>(undefined);
 
+/**
+ * AuthContextProvider
+ *
+ * Root-level context provider that manages the Supabase session globally.
+ * - Initialises the session on mount via `getSession()`.
+ * - Subscribes to `onAuthStateChange` so all consumers re-render on login/logout.
+ * - On fatal error (missing env, bad client) displays a "restart app" Alert.
+ * - On non-fatal error displays a "sign out" Alert with a recovery action.
+ *
+ * Exposes via `AuthContext`:
+ *   `{ supabase, authSession, authError, authLoading }`
+ */
 export const AuthContextProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [sessionState, setSessionState] = useState<Session | null>(null);
   const [errorState, setErrorState] = useState<ErrorType | null>(null);
