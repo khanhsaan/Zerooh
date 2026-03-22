@@ -1,0 +1,18 @@
+{
+  "name": "zeroooh-backend",
+  "version": "1.0.0",
+  "description": "Seed script for Zeroooh local Supabase database",
+  "scripts": {
+    "seed": "ts-node seed.ts"
+  },
+  "type": "commonjs",
+  "devDependencies": {
+    "@types/node": "^25.3.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.98.0",
+    "dotenv": "^17.3.1"
+  }
+}
